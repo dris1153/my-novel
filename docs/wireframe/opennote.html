@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Novel — Opennote Redesign Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&family=Inter:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+/* ============ OPENNOTE TOKENS (từ DESIGN.md) ============ */
+:root{
+  --ivory:#fffdf8; --ink:#0a0a0a; --black:#000;
+  --rule:#e5e5e5; --smoke:#8c8c8c; --ash:#d1d1d1;
+  --slate:#474747; --halo:#f9f9f9;
+  --sepia:#512906; --violet:#242d64; --forest:#0c3b1a;
+  --oxblood:#5e0831; --yellow:#ffc934;
+
+  --serif:'Source Serif 4',Georgia,serif;   /* headline — không bao giờ bold */
+  --sans:'Inter',system-ui,sans-serif;        /* body/UI/nav/button */
+  --read:'Literata',Georgia,serif;            /* CHỈ thân truyện — giữ từ bản cũ */
+
+  --r:10px;                                    /* một radius duy nhất */
+  --lh-read:1.8;                               /* ràng buộc tiếng Việt, giữ nguyên */
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ivory);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
+/* ============ PAGE CHROME ============ */
+.topnote{position:sticky;top:0;z-index:50;background:var(--ivory);
+  border-bottom:1px solid var(--rule);padding:16px 24px;display:flex;gap:24px;
+  align-items:center;flex-wrap:wrap}
+.topnote b{font-family:var(--sans);font-weight:600;letter-spacing:-.01em}
+.topnote nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.topnote a{color:var(--ink);text-decoration:none;font-size:14px;font-weight:500;
+  padding:6px 12px;border-radius:var(--r)}
+.topnote a:hover{background:var(--halo)}
+
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px 128px}
+section{padding-top:80px}
+.eyebrow{font-family:var(--sans);font-size:14px;color:var(--smoke);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.h-serif{font-family:var(--serif);font-weight:400;color:var(--ink);letter-spacing:-.01em}
+.sec-h{font-family:var(--serif);font-weight:400;font-size:42px;line-height:1.1;
+  text-align:center;margin-bottom:12px}
+.sec-sub{font-family:var(--sans);font-size:16px;color:var(--smoke);text-align:center;
+  max-width:60ch;margin:0 auto 40px}
+.note{color:var(--slate);font-size:16px;line-height:1.5;max-width:70ch;margin-bottom:32px}
+.note code{font-family:ui-monospace,monospace;font-size:13px;background:var(--halo);
+  border:1px solid var(--rule);padding:1px 6px;border-radius:6px}
+
+/* ============ BUTTONS (Opennote) ============ */
+.btn{font-family:var(--sans);font-size:14px;font-weight:500;line-height:1;
+  padding:12px 18px;border-radius:var(--r);cursor:pointer;border:0;text-align:center;
+  display:inline-block;text-decoration:none}
+.btn-sepia{background:var(--sepia);color:var(--ivory)}         /* CTA chính duy nhất */
+.btn-sepia:hover{background:#3d1f04}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--ash)}
+.btn-ghost:hover{border-color:var(--ink)}
+.btn-ghost-light{background:transparent;color:var(--ivory);border:1px solid rgba(255,253,248,.4)}
+
+/* ============ DEVICE FRAMES ============ */
+.rail{display:flex;gap:28px;overflow-x:auto;padding:8px 0 20px;align-items:flex-start}
+.dev{flex:0 0 auto;width:340px}
+.dev>figcaption{font-family:var(--sans);font-size:14px;color:var(--smoke);margin-bottom:12px}
+.phone{width:340px;height:720px;background:var(--ivory);border:1px solid var(--rule);
+  border-radius:22px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.status{height:36px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;font-size:12px;font-weight:500;color:var(--slate)}
+.pbody{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.pscroll{flex:1;overflow:hidden;padding:0 20px}
+
+/* ============ PRIMITIVES ============ */
+.row{display:flex;align-items:center;gap:12px}
+.btw{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.t-cap{font-size:14px;line-height:1.43} .t-body{font-size:16px}
+.mut{color:var(--smoke)} .slate{color:var(--slate)}
+.serif{font-family:var(--serif);font-weight:400}
+
+.cover{border-radius:var(--r);background:linear-gradient(150deg,var(--c1),var(--c2));
+  display:flex;align-items:flex-end;padding:8px;position:relative;overflow:hidden;flex:0 0 auto;
+  border:1px solid var(--rule)}
+.cover::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.45))}
+.cover em{position:relative;z-index:1;font-style:normal;color:#fff;font-size:11px;
+  font-family:var(--serif);line-height:1.2;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.c-a{--c1:#5b4636;--c2:#2b1d12} .c-b{--c1:#2f3a52;--c2:#1a2130}
+.c-c{--c1:#4a3c5c;--c2:#241a30} .c-d{--c1:#38503a;--c2:#1a251b}
+.c-e{--c1:#6b5330;--c2:#33260f} .c-f{--c1:#4b3040;--c2:#241722}
+
+/* Opennote: viền hairline, không bóng, một radius */
+.card{background:var(--ivory);border:1px solid var(--rule);border-radius:var(--r);padding:24px}
+.card:hover{border-color:var(--ink)}
+
+.tag{font-family:var(--sans);font-size:14px;padding:3px 10px;border-radius:var(--r);
+  border:1px solid var(--rule);color:var(--slate);background:transparent}
+.tag-forest{color:var(--forest);border-color:var(--forest)}
+.chip{font-family:var(--sans);font-size:14px;color:var(--smoke);padding:6px 0}
+.chip.on{color:var(--ink);border-bottom:2px solid var(--ink)}
+
+/* ============ INK-VIOLET FEATURE PANEL (một cái/trang) ============ */
+.violet{background:var(--violet);color:var(--ivory);border-radius:var(--r);padding:40px}
+.violet .h-serif{color:var(--ivory)}
+
+/* ============ TOKEN DISPLAY ============ */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+.sw{border:1px solid var(--rule);border-radius:var(--r);overflow:hidden}
+.sw .chipc{height:64px} .sw .meta{padding:10px 12px}
+.typerow{border-bottom:1px solid var(--rule);padding:20px 0;display:flex;gap:24px;
+  align-items:baseline;flex-wrap:wrap}
+.typerow .lbl{flex:0 0 150px;font-family:var(--sans);font-size:14px;color:var(--smoke)}
+
+.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
+.thsw{border:1px solid var(--rule);border-radius:var(--r);padding:18px;font-family:var(--read);
+  font-size:14px;line-height:var(--lh-read)}
+.th-paper{background:#FBF8F3;color:#1C1917} .th-sepia{background:#F2E7D0;color:#3B2F1E}
+.th-night{background:#141210;color:#C9C2B8} .th-oled{background:#000;color:#B5AFA6}
+.thsw b{display:block;font-family:var(--sans);font-size:12px;text-transform:uppercase;
+  letter-spacing:.08em;opacity:.6;margin-bottom:8px;font-weight:500}
+
+/* ============ DESKTOP MOCK ============ */
+.desk{border:1px solid var(--rule);border-radius:var(--r);overflow:hidden;background:var(--ivory)}
+.dtop{background:var(--halo);border-bottom:1px solid var(--rule);padding:10px 16px;
+  display:flex;gap:7px;align-items:center}
+.dot{width:11px;height:11px;border-radius:99px;background:var(--rule)}
+.dtop .url{margin-left:12px;background:var(--ivory);border:1px solid var(--rule);
+  border-radius:6px;padding:4px 12px;font-size:12px;color:var(--smoke)}
+.dnav{border-bottom:1px solid var(--rule);padding:18px 28px;display:flex;align-items:center;gap:24px}
+.dnav .lg{font-family:var(--sans);font-weight:600;font-size:18px;letter-spacing:-.01em}
+.dnav .lk{font-size:14px;font-weight:500;color:var(--ink)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:20px}
+
+/* ============ ADMIN ============ */
+.admin{display:grid;grid-template-columns:220px 1fr}
+.aside{background:var(--halo);border-right:1px solid var(--rule);padding:24px 16px}
+.aitem{font-family:var(--sans);padding:10px 12px;border-radius:var(--r);font-size:14px;
+  font-weight:500;color:var(--slate)}
+.aitem.on{background:var(--ivory);border:1px solid var(--rule);color:var(--ink)}
+.field{margin-bottom:16px}
+.field label{display:block;font-family:var(--sans);font-size:14px;color:var(--slate);margin-bottom:6px}
+.input{border:1px solid var(--ash);border-radius:var(--r);padding:11px 14px;font-size:14px;
+  color:var(--slate);background:var(--ivory);font-family:var(--sans)}
+.drop{border:1px solid var(--ash);border-radius:var(--r);padding:24px;text-align:center;background:var(--halo)}
+table{width:100%;border-collapse:collapse;font-size:14px;font-family:var(--sans)}
+th{text-align:left;font-size:14px;color:var(--smoke);font-weight:500;
+  padding:12px;border-bottom:1px solid var(--rule)}
+td{padding:14px 12px;border-bottom:1px solid var(--rule)}
+.pill{font-size:14px;padding:2px 10px;border-radius:var(--r);border:1px solid}
+.pill.pub{color:var(--forest);border-color:var(--forest)}
+.pill.dft{color:var(--smoke);border-color:var(--rule)}
+
+.callout{background:var(--halo);border:1px solid var(--rule);border-left:3px solid var(--sepia);
+  border-radius:var(--r);padding:16px 20px;font-size:15px;color:var(--slate);line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="topnote">
+  <b>Novel × Opennote — Redesign Demo</b>
+  <nav>
+    <a href="#tokens">Tokens</a><a href="#app">App</a><a href="#reader">Reader</a>
+    <a href="#web">Web</a><a href="#admin">Admin</a>
+  </nav>
+</div>
+
+<div class="wrap">
+
+<!-- ══════════ INTRO ══════════ -->
+<section id="intro" style="padding-top:56px">
+  <p class="eyebrow">Đề xuất</p>
+  <h1 class="h-serif" style="font-size:48px;line-height:1.08;max-width:16ch;margin-bottom:20px">Sổ tay giấy ấm cho một app đọc truyện</h1>
+  <p class="note">Áp design system <b>Opennote</b> lên phần chrome (home, chi tiết, tìm kiếm, tủ truyện) và toàn bộ admin. Vùng <b>đọc truyện giữ nguyên</b> hệ 4-theme + <code>line-height 1.8</code> để không phá trải nghiệm đọc đêm và chữ tiếng Việt.</p>
+  <div class="callout">3 điều Opennote KHÔNG áp: (1) reader vẫn có theme Đêm/OLED — không ép light-only; (2) thân truyện giữ Literata @1.8, không hạ xuống 1.5; (3) không dùng marginalia doodle marketing — bìa truyện là ảnh nội dung, được giữ.</div>
+</section>
+
+<!-- ══════════ TOKENS ══════════ -->
+<section id="tokens">
+  <p class="eyebrow">Nền tảng</p>
+  <h2 class="h-serif" style="font-size:42px;line-height:1.1;margin-bottom:32px">Design tokens</h2>
+
+  <div class="swatches" style="margin-bottom:40px">
+    <div class="sw"><div class="chipc" style="background:#fffdf8;border-bottom:1px solid var(--rule)"></div><div class="meta"><div class="t-cap serif" style="font-size:16px">Ivory Page</div><div class="t-cap mut">#fffdf8 · canvas</div></div></div>
+    <div class="sw"><div class="chipc" style="background:#0a0a0a"></div><div class="meta"><div class="t-cap serif" style="font-size:16px">Ink Charcoal</div><div class="t-cap mut">#0a0a0a · chữ</div></div></div>
+    <div class="sw"><div class="chipc" style="background:#512906"></div><div class="meta"><div class="t-cap serif" style="font-size:16px">Sepia</div><div class="t-cap mut">#512906 · CTA</div></div></div>
+    <div class="sw"><div class="chipc" style="background:#242d64"></div><div class="meta"><div class="t-cap serif" style="font-size:16px">Ink Violet</div><div class="t-cap mut">#242d64 · panel</div></div></div>
+    <div class="sw"><div class="chipc" style="background:#0c3b1a"></div><div class="meta"><div class="t-cap serif" style="font-size:16px">Forest Ink</div><div class="t-cap mut">#0c3b1a · tag</div></div></div>
+    <div class="sw"><div class="chipc" style="background:#e5e5e5"></div><div class="meta"><div class="t-cap serif" style="font-size:16px">Graphite Rule</div><div class="t-cap mut">#e5e5e5 · viền</div></div></div>
+  </div>
+
+  <div class="typerow"><div class="lbl">Display · Serif 48</div><div class="serif" style="font-size:48px;line-height:1.08">Kiếm Động Cửu Thiên</div></div>
+  <div class="typerow"><div class="lbl">Heading · Serif 42</div><div class="serif" style="font-size:42px;line-height:1.1">Người Gác Đèn Biển</div></div>
+  <div class="typerow"><div class="lbl">Subheading · Serif 20</div><div class="serif" style="font-size:20px">Chương 147 — Đêm trước cửa ải</div></div>
+  <div class="typerow"><div class="lbl">Body · Inter 16/1.5</div><div class="t-body">Cập nhật 12 phút trước · 1.247 chương · 89K lượt đọc</div></div>
+  <div class="typerow"><div class="lbl">Caption · Inter 14</div><div class="t-cap mut">TIÊN HIỆP · ĐANG RA</div></div>
+  <div class="typerow" style="border:0"><div class="lbl">Reading · Literata 17/1.8</div>
+    <div style="font-family:var(--read);font-size:17px;line-height:var(--lh-read);max-width:60ch">Gió từ phía biển thổi lên, mang theo vị muối mặn và tiếng sóng đều đặn vỗ vào chân ghềnh đá.</div></div>
+
+  <h3 class="serif" style="font-size:32px;margin:48px 0 8px">Bốn theme vùng đọc — giữ nguyên</h3>
+  <p class="note" style="margin-bottom:20px">Opennote định hình chrome. Vùng đọc vẫn là tính năng riêng: Đêm/OLED cho đọc ban đêm, không bị ép về giấy ấm.</p>
+  <div class="themes">
+    <div class="thsw th-paper"><b>Giấy — mặc định</b>Ngọn hải đăng đứng lặng giữa màn sương, ánh đèn quét từng vòng chậm rãi qua mặt vịnh.</div>
+    <div class="thsw th-sepia"><b>Ngả vàng</b>Ngọn hải đăng đứng lặng giữa màn sương, ánh đèn quét từng vòng chậm rãi qua mặt vịnh.</div>
+    <div class="thsw th-night"><b>Đêm</b>Ngọn hải đăng đứng lặng giữa màn sương, ánh đèn quét từng vòng chậm rãi qua mặt vịnh.</div>
+    <div class="thsw th-oled"><b>Đen tuyền</b>Ngọn hải đăng đứng lặng giữa màn sương, ánh đèn quét từng vòng chậm rãi qua mặt vịnh.</div>
+  </div>
+</section>
+
+<!-- ══════════ APP ══════════ -->
+<section id="app">
+  <p class="eyebrow">375pt · Expo</p>
+  <h2 class="h-serif" style="font-size:42px;line-height:1.1;margin-bottom:16px">App — chrome theo Opennote</h2>
+  <p class="note">Header hairline, một CTA sepia, một panel ink-violet cho đề cử. Không đổ bóng, radius 10px, chữ tiêu đề là serif.</p>
+
+  <div class="rail">
+    <!-- HOME -->
+    <figure class="dev"><figcaption>01 · Trang chủ</figcaption>
+    <div class="phone"><div class="status"><span>9:41</span><span>▮▮▮ ᯤ</span></div>
+      <div class="pbody"><div class="pscroll">
+        <div class="btw" style="padding:14px 0 16px">
+          <div><div class="t-cap mut" style="text-transform:uppercase;letter-spacing:.08em">Chào buổi tối</div>
+            <div class="serif" style="font-size:28px;line-height:1.1">Đọc tiếp</div></div>
+          <div style="width:36px;height:36px;border-radius:var(--r);border:1px solid var(--rule)"></div>
+        </div>
+        <div style="border:1px solid var(--ash);border-radius:var(--r);padding:11px 14px;margin-bottom:24px;color:var(--smoke);font-size:14px">Tìm truyện, tác giả…</div>
+
+        <!-- INK-VIOLET FEATURE PANEL (một cái/trang) -->
+        <div class="violet" style="padding:24px;margin-bottom:24px">
+          <div class="t-cap" style="opacity:.7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Đề cử tuần</div>
+          <div class="row" style="gap:14px;align-items:flex-start">
+            <div class="cover c-a" style="width:64px;height:90px;border-color:rgba(255,255,255,.2)"></div>
+            <div style="flex:1;min-width:0">
+              <div class="h-serif" style="font-size:20px;line-height:1.2;margin-bottom:4px">Người Gác Đèn Biển</div>
+              <div class="t-cap" style="opacity:.75">Vũ Hà Chi · 312 chương</div>
+              <a class="btn btn-ghost-light" style="margin-top:12px;padding:8px 14px">Đọc từ đầu</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="serif" style="font-size:24px;margin-bottom:14px">Mới cập nhật</div>
+        <div class="row" style="border-top:1px solid var(--rule);padding:14px 0">
+          <div class="cover c-e" style="width:44px;height:62px"></div>
+          <div style="flex:1;min-width:0"><div class="serif" style="font-size:18px">Kiếm Động Cửu Thiên</div>
+            <div class="t-cap mut">1247 chương · 12 phút trước</div>
+            <div class="row" style="gap:6px;margin-top:6px"><span class="tag tag-forest">Tiên hiệp</span><span class="tag">Đang ra</span></div></div>
+        </div>
+        <div class="row" style="border-top:1px solid var(--rule);padding:14px 0">
+          <div class="cover c-b" style="width:44px;height:62px"></div>
+          <div style="flex:1;min-width:0"><div class="serif" style="font-size:18px">Thành Phố Không Ngủ</div>
+            <div class="t-cap mut">512 chương · 1 giờ trước</div>
+            <div class="row" style="gap:6px;margin-top:6px"><span class="tag tag-forest">Đô thị</span></div></div>
+        </div>
+        <div class="row" style="border-top:1px solid var(--rule);padding:14px 0">
+          <div class="cover c-f" style="width:44px;height:62px"></div>
+          <div style="flex:1;min-width:0"><div class="serif" style="font-size:18px">Bí Ẩn Rừng Sương</div>
+            <div class="t-cap mut">88 chương · 3 giờ trước</div></div>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--rule);display:flex;padding:12px 0 20px">
+        <div style="flex:1;text-align:center"><div style="font-size:18px">⌂</div><div class="t-cap" style="color:var(--ink)">Trang chủ</div></div>
+        <div style="flex:1;text-align:center;color:var(--smoke)"><div style="font-size:18px">▤</div><div class="t-cap">Tủ truyện</div></div>
+        <div style="flex:1;text-align:center;color:var(--smoke)"><div style="font-size:18px">☺</div><div class="t-cap">Tôi</div></div>
+      </div></div>
+    </div></figure>
+
+    <!-- DETAIL -->
+    <figure class="dev"><figcaption>02 · Chi tiết truyện</figcaption>
+    <div class="phone"><div class="status"><span>9:41</span><span>▮▮▮ ᯤ</span></div>
+      <div class="pbody"><div class="pscroll">
+        <div style="padding:6px 0 4px;color:var(--slate);font-size:14px">‹ Quay lại</div>
+        <div class="row" style="gap:16px;align-items:flex-start;padding:16px 0">
+          <div class="cover c-a" style="width:104px;height:146px"></div>
+          <div style="flex:1;min-width:0;padding-top:4px">
+            <div class="h-serif" style="font-size:24px;line-height:1.12">Người Gác Đèn Biển</div>
+            <div class="t-cap slate" style="margin:6px 0 12px">Vũ Hà Chi</div>
+            <div class="row" style="gap:6px;flex-wrap:wrap"><span class="tag tag-forest">Tâm lý</span><span class="tag">Hoàn thành</span></div>
+          </div>
+        </div>
+        <div class="row" style="gap:24px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:16px 0;margin-bottom:20px">
+          <div><div class="serif" style="font-size:20px">4.8</div><div class="t-cap mut">Đánh giá</div></div>
+          <div><div class="serif" style="font-size:20px">312</div><div class="t-cap mut">Chương</div></div>
+          <div><div class="serif" style="font-size:20px">89K</div><div class="t-cap mut">Lượt đọc</div></div>
+        </div>
+        <div class="row" style="gap:10px;margin-bottom:20px">
+          <a class="btn btn-sepia" style="flex:1">Đọc từ đầu</a>
+          <a class="btn btn-ghost" style="padding:12px 16px">♡ Theo dõi</a>
+        </div>
+        <p class="slate" style="font-size:15px;line-height:1.5;margin-bottom:6px">Ba mươi năm sau ngày cha mất tích, Lâm quay lại ngọn hải đăng cũ với một lá thư chưa từng được mở…</p>
+        <div class="serif" style="font-size:20px;margin:20px 0 4px">Danh sách chương</div>
+        <div style="border-top:1px solid var(--rule);padding:14px 0"><div class="t-body">Chương 34 — Lá thư trong hộp thiếc</div><div class="t-cap mut">2 ngày trước</div></div>
+        <div style="border-top:1px solid var(--rule);padding:14px 0"><div class="t-body">Chương 33 — Con đường ven vịnh</div><div class="t-cap mut">3 ngày trước</div></div>
+        <div style="border-top:1px solid var(--rule);padding:14px 0"><div class="t-body">Chương 32 — Người đàn bà bán cá</div><div class="t-cap mut">5 ngày trước</div></div>
+      </div></div>
+    </div></figure>
+
+    <!-- READER (giữ multi-theme) -->
+    <figure class="dev"><figcaption>03 · Đang đọc — theme Giấy (giữ nguyên)</figcaption>
+    <div class="phone" style="background:#FBF8F3"><div class="status"><span>9:41</span><span>▮▮▮ ᯤ</span></div>
+      <div class="pbody">
+        <div class="btw" style="padding:4px 20px 12px;color:#8B837A;font-size:14px">
+          <span>‹ Người Gác Đèn Biển</span><span>Aa</span></div>
+        <div class="pscroll">
+          <div style="font-family:var(--read);font-size:20px;font-weight:600;color:#1C1917;line-height:1.35;margin-bottom:18px">Lá thư trong hộp thiếc</div>
+          <div style="font-family:var(--read);font-size:17px;line-height:1.8;color:#1C1917">
+            <p style="margin-bottom:16px">Gió từ phía biển thổi lên, mang theo vị muối mặn và tiếng sóng đều đặn vỗ vào chân ghềnh đá. Lâm đứng lặng trên bậc thang cuối cùng, tay còn nắm chặt lá thư đã nhàu.</p>
+            <p style="margin-bottom:16px">Ba mươi năm trước, cha anh cũng đứng đúng chỗ này. Cùng một ngọn đèn, cùng một khoảng trời xám.</p>
+            <p>Anh mở nắp hộp thiếc. Bên trong chỉ là một tấm bản đồ vẽ tay, mực đã phai gần hết.</p>
+          </div>
+        </div>
+        <div style="padding:14px 20px 20px;border-top:1px solid #E7E1D8;background:rgba(251,248,243,.9)">
+          <div class="btw"><span style="color:#8B837A;font-size:14px">‹ Chương trước</span><span style="color:#512906;font-weight:500;font-size:14px">Chương sau ›</span></div>
+        </div>
+      </div>
+    </div></figure>
+
+    <!-- READER SETTINGS -->
+    <figure class="dev"><figcaption>04 · Tuỳ chỉnh đọc — 4 theme còn nguyên</figcaption>
+    <div class="phone" style="background:#FBF8F3"><div class="status"><span>9:41</span><span>▮▮▮ ᯤ</span></div>
+      <div class="pbody" style="position:relative">
+        <div class="pscroll" style="padding:8px 20px;opacity:.25;font-family:var(--read);font-size:17px;line-height:1.8;color:#1C1917">
+          <p>Gió từ phía biển thổi lên, mang theo vị muối mặn và tiếng sóng đều đặn vỗ vào chân ghềnh đá.</p>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:var(--r) var(--r) 0 0;
+          border-top:1px solid #E7E1D8;padding:16px 20px 24px">
+          <div style="width:36px;height:4px;background:#E7E1D8;border-radius:99px;margin:0 auto 18px"></div>
+          <div class="t-cap mut" style="text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Cỡ chữ</div>
+          <div class="row" style="gap:10px;margin-bottom:20px">
+            <span style="color:#8B837A">A</span>
+            <div style="flex:1;height:2px;background:#E7E1D8;position:relative"><div style="position:absolute;left:45%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:99px;background:#512906"></div></div>
+            <span style="font-size:19px">A</span>
+          </div>
+          <div class="t-cap mut" style="text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Nền</div>
+          <div class="row" style="gap:10px">
+            <div style="flex:1;height:44px;border-radius:var(--r);background:#FBF8F3;border:2px solid #512906"></div>
+            <div style="flex:1;height:44px;border-radius:var(--r);background:#F2E7D0;border:1px solid #E7E1D8"></div>
+            <div style="flex:1;height:44px;border-radius:var(--r);background:#141210"></div>
+            <div style="flex:1;height:44px;border-radius:var(--r);background:#000"></div>
+          </div>
+        </div>
+      </div>
+    </div></figure>
+  </div>
+</section>
+
+<!-- ══════════ WEB ══════════ -->
+<section id="web">
+  <p class="eyebrow">breakpoint lg:</p>
+  <h2 class="h-serif" style="font-size:42px;line-height:1.1;margin-bottom:16px">Web desktop</h2>
+  <p class="note">Header hairline, nav giữa, ghost button phải — đúng Header Bar của Opennote. Lưới bìa 6 cột, một panel ink-violet cho đề cử.</p>
+
+  <div class="desk" style="margin-bottom:40px">
+    <div class="dtop"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">truyen.example.com</span></div>
+    <div class="dnav"><span class="lg">Truyện</span>
+      <span class="lk">Trang chủ</span><span class="lk mut">Thể loại</span><span class="lk mut">Bảng xếp hạng</span>
+      <a class="btn btn-ghost" style="margin-left:auto">Đăng nhập</a></div>
+    <div style="padding:40px 28px">
+      <div class="violet" style="display:flex;gap:28px;margin-bottom:48px">
+        <div class="cover c-a" style="width:120px;height:170px;border-color:rgba(255,255,255,.2)"></div>
+        <div style="flex:1;padding-top:6px">
+          <div class="t-cap" style="opacity:.7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Đề cử tuần này</div>
+          <div class="h-serif" style="font-size:42px;line-height:1.1;margin-bottom:10px">Người Gác Đèn Biển</div>
+          <p style="opacity:.85;font-size:16px;line-height:1.5;max-width:52ch;margin-bottom:20px">Ba mươi năm sau ngày cha mất tích, Lâm quay lại ngọn hải đăng cũ với một lá thư chưa từng được mở.</p>
+          <a class="btn btn-ghost-light">Đọc từ đầu</a>
+        </div>
+      </div>
+
+      <div class="btw" style="margin-bottom:24px"><div class="serif" style="font-size:32px">Mới cập nhật</div>
+        <div class="row" style="gap:24px"><span class="chip on">Tất cả</span><span class="chip">Tiên hiệp</span><span class="chip">Ngôn tình</span><span class="chip">Trinh thám</span></div></div>
+      <div class="grid6">
+        <div><div class="cover c-b" style="height:210px;margin-bottom:10px"></div><div class="serif" style="font-size:18px">Thành Phố Không Ngủ</div><div class="t-cap mut">Ch. 512</div></div>
+        <div><div class="cover c-c" style="height:210px;margin-bottom:10px"></div><div class="serif" style="font-size:18px">Lối Về Mùa Hạ</div><div class="t-cap mut">Ch. 89</div></div>
+        <div><div class="cover c-d" style="height:210px;margin-bottom:10px"></div><div class="serif" style="font-size:18px">Trấn Yêu Ký</div><div class="t-cap mut">Ch. 340</div></div>
+        <div><div class="cover c-e" style="height:210px;margin-bottom:10px"></div><div class="serif" style="font-size:18px">Kiếm Động Cửu Thiên</div><div class="t-cap mut">Ch. 1247</div></div>
+        <div><div class="cover c-f" style="height:210px;margin-bottom:10px"></div><div class="serif" style="font-size:18px">Bí Ẩn Rừng Sương</div><div class="t-cap mut">Ch. 88</div></div>
+        <div><div class="cover c-a" style="height:210px;margin-bottom:10px"></div><div class="serif" style="font-size:18px">Giữa Hai Bờ Sương</div><div class="t-cap mut">Ch. 76</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="desk">
+    <div class="dtop"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">truyen.example.com/nguoi-gac-den-bien/chuong-34</span></div>
+    <div style="background:#FBF8F3;padding:0 0 40px">
+      <div class="btw" style="padding:16px 30px;border-bottom:1px solid #E7E1D8;color:#57534E;font-size:14px">
+        <span>‹ Người Gác Đèn Biển</span><div class="row" style="gap:16px"><span>Aa</span><span>◐</span><span>▤ Mục lục</span></div></div>
+      <div style="max-width:680px;margin:0 auto;padding:48px 24px 0">
+        <div class="t-cap" style="color:#8B837A;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Chương 34 / 312</div>
+        <h1 style="font-family:var(--read);font-size:32px;font-weight:600;color:#1C1917;margin-bottom:28px">Lá thư trong hộp thiếc</h1>
+        <div style="font-family:var(--read);font-size:19px;line-height:1.85;color:#1C1917">
+          <p style="margin-bottom:20px">Gió từ phía biển thổi lên, mang theo vị muối mặn và tiếng sóng đều đặn vỗ vào chân ghềnh đá. Lâm đứng lặng trên bậc thang cuối cùng của ngọn hải đăng, tay còn nắm chặt lá thư đã nhàu.</p>
+          <p>Ba mươi năm trước, cha anh cũng đứng đúng chỗ này. Cùng một ngọn đèn, cùng một khoảng trời xám đục.</p>
+        </div>
+        <div class="row" style="gap:12px;margin-top:40px;padding-top:24px;border-top:1px solid #E7E1D8">
+          <a class="btn btn-ghost" style="flex:1;border-color:#E7E1D8;color:#57534E">‹ Chương 33</a>
+          <a class="btn btn-sepia" style="flex:1">Chương 35 ›</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ADMIN ══════════ -->
+<section id="admin">
+  <p class="eyebrow">Next.js 16</p>
+  <h2 class="h-serif" style="font-size:42px;line-height:1.1;margin-bottom:16px">Admin</h2>
+  <p class="note">Bảng viền hairline, không đổ bóng. Trạng thái dùng Forest Ink cho "đã đăng". Một CTA sepia "Đăng".</p>
+
+  <div class="desk" style="margin-bottom:32px">
+    <div class="dtop"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">admin.truyen.example.com/novels</span></div>
+    <div class="admin">
+      <div class="aside">
+        <div class="serif" style="font-size:20px;padding:0 12px 20px">Novel Admin</div>
+        <div class="aitem on">Truyện</div><div class="aitem">Chương</div><div class="aitem">Thể loại</div><div class="aitem">Thống kê</div>
+      </div>
+      <div style="padding:28px">
+        <div class="btw" style="margin-bottom:24px">
+          <div><div class="serif" style="font-size:32px">Truyện</div><div class="t-cap mut">128 truyện · 2 bản nháp</div></div>
+          <a class="btn btn-sepia">+ Thêm truyện</a>
+        </div>
+        <table>
+          <tr><th style="width:44%">Tên truyện</th><th>Tác giả</th><th>Chương</th><th>Trạng thái</th><th>Cập nhật</th></tr>
+          <tr><td><div class="row"><div class="cover c-a" style="width:30px;height:42px"></div><span class="serif" style="font-size:16px">Người Gác Đèn Biển</span></div></td>
+            <td class="slate">Vũ Hà Chi</td><td class="slate">312</td><td><span class="pill pub">Đã đăng</span></td><td class="mut">2 ngày</td></tr>
+          <tr><td><div class="row"><div class="cover c-b" style="width:30px;height:42px"></div><span class="serif" style="font-size:16px">Thành Phố Không Ngủ</span></div></td>
+            <td class="slate">Ngô Bảo</td><td class="slate">512</td><td><span class="pill pub">Đã đăng</span></td><td class="mut">8 phút</td></tr>
+          <tr><td><div class="row"><div class="cover c-c" style="width:30px;height:42px"></div><span class="serif" style="font-size:16px">Giữa Hai Bờ Sương</span></div></td>
+            <td class="slate">Lê Trâm</td><td class="slate">12</td><td><span class="pill dft">Nháp</span></td><td class="mut">1 giờ</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="desk">
+    <div class="dtop"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url">admin.truyen.example.com/novels/new</span></div>
+    <div class="admin">
+      <div class="aside">
+        <div class="serif" style="font-size:20px;padding:0 12px 20px">Novel Admin</div>
+        <div class="aitem on">Truyện</div><div class="aitem">Chương</div><div class="aitem">Thể loại</div><div class="aitem">Thống kê</div>
+      </div>
+      <div style="padding:28px">
+        <div class="serif" style="font-size:32px;margin-bottom:24px">Thêm truyện mới</div>
+        <div style="display:grid;grid-template-columns:1fr 260px;gap:32px">
+          <div>
+            <div class="field"><label>Tên truyện *</label><div class="input">Người Gác Đèn Biển</div></div>
+            <div class="row" style="gap:16px">
+              <div class="field" style="flex:1"><label>Slug</label><div class="input">nguoi-gac-den-bien</div></div>
+              <div class="field" style="flex:1"><label>Tác giả *</label><div class="input">Vũ Hà Chi</div></div>
+            </div>
+            <div class="field"><label>Mô tả</label><div class="input" style="height:80px;line-height:1.5">Ba mươi năm sau ngày cha mất tích…</div></div>
+            <div class="field"><label>Thể loại</label>
+              <div class="row" style="gap:8px;flex-wrap:wrap"><span class="tag tag-forest">Tâm lý ✕</span><span class="tag tag-forest">Gia đình ✕</span><span class="tag">+ Tiên hiệp</span></div></div>
+          </div>
+          <div>
+            <div class="field"><label>Ảnh bìa → R2</label>
+              <div class="drop"><div class="cover c-a" style="width:88px;height:124px;margin:0 auto 12px"></div>
+                <div class="t-cap" style="font-weight:500">Kéo thả hoặc chọn file</div>
+                <div class="t-cap mut" style="margin-top:3px">JPG/WebP · 2:3 · tối đa 2MB</div></div>
+            </div>
+            <div class="row" style="gap:10px;margin-top:20px"><a class="btn btn-ghost" style="flex:1">Lưu nháp</a><a class="btn btn-sepia" style="flex:1">Đăng</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

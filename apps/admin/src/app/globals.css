@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* Opennote design system — xem DESIGN.md, demo docs/wireframe/opennote.html.
+   Giữ tên class cũ, đổi giá trị: `sienna` nay là sepia #512906, `ok` là forest. */
+@theme {
+  --color-paper: #fffdf8;        /* ivory page */
+  --color-surface: #fffdf8;      /* Opennote: không dùng trắng thuần, card = canvas */
+  --color-raised: #f9f9f9;       /* soft halo */
+  --color-ink: #0a0a0a;          /* ink charcoal */
+  --color-ink-2: #474747;        /* slate body */
+  --color-ink-3: #8c8c8c;        /* smoke */
+  --color-line: #e5e5e5;         /* graphite rule */
+  --color-sienna: #512906;       /* (tên cũ) nay là SEPIA — CTA duy nhất */
+  --color-sienna-soft: #f2ece3;
+  --color-violet: #242d64;       /* ink-violet feature panel */
+  --color-ok: #0c3b1a;           /* forest — trạng thái "đã đăng" */
+  --color-ok-soft: #eaf0ea;
+
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), Georgia, serif;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Tailwind v4 Preflight bỏ cursor:pointer mặc định của button. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  select:not(:disabled),
+  label:has(> input[type="checkbox"]),
+  label:has(> input[type="radio"]) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}

@@ -1,0 +1,18 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# pnpm 10+ chặn postinstall mặc định. unrs-resolver là native binding của
+# resolver ESLint, không chạy build thì lint hỏng.
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+
+# pnpm 11 giữ lại package mới publish; các bản này đã pin có chủ đích.
+minimumReleaseAgeExclude:
+  - '@supabase/auth-js@2.112.3'
+  - '@supabase/functions-js@2.112.3'
+  - '@supabase/postgrest-js@2.112.3'
+  - '@supabase/realtime-js@2.112.3'
+  - '@supabase/storage-js@2.112.3'
+  - '@supabase/supabase-js@2.112.3'

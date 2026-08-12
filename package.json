@@ -1,0 +1,20 @@
+{
+  "name": "novel",
+  "private": true,
+  "packageManager": "pnpm@11.5.1",
+  "scripts": {
+    "mobile": "pnpm --filter mobile start",
+    "mobile:web": "pnpm --filter mobile web",
+    "admin": "pnpm --filter admin dev",
+    "crawl": "pnpm --filter crawler crawl",
+    "db:link": "supabase link",
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --linked > packages/shared/src/database.types.ts",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "supabase": "^2.113.0",
+    "typescript": "^5.9.3"
+  }
+}
