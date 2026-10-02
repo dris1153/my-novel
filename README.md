@@ -5,13 +5,15 @@ Monorepo pnpm workspaces. Một codebase React Native chạy iOS/Android/Web, m�
 
 ```
 apps/mobile      Expo 57 + expo-router  → iOS, Android, Web (static render)
-apps/web         Next.js 16             → web đọc truyện public (SSR/ISR, SEO)
+apps/web         Next.js 16             → app đọc truyện cá nhân (chạy local)
 apps/admin       Next.js 16             → trang quản trị
 packages/shared  types DB + helper thuần (slug tiếng Việt, tách chương)
 packages/crawler CLI crawl truyện từ truyenfull → Supabase
 supabase/        migration
-docs/wireframe/  bản thiết kế đã duyệt
+docs/            hướng dẫn sử dụng + wireframe
 ```
+
+**Hướng dẫn dùng app đọc hằng ngày: [`docs/huong-dan-su-dung.md`](docs/huong-dan-su-dung.md)**
 
 ## Chạy lần đầu
 
@@ -152,8 +154,9 @@ Ghi chú:
 
 ## Giới hạn đã biết: SEO của bản Expo web chỉ có phần khung
 
-> **Đã giải ở `apps/web`.** Web public mới (Next.js, SSR/ISR) render nội dung thật —
-> xem `apps/web`. Phần dưới chỉ còn đúng cho bản export web của `apps/mobile`.
+> **`apps/web` không dính giới hạn này.** Nó là app đọc cá nhân chạy local, render nội dung
+> thật ở phía server — nhưng **không nhắm tới SEO** (xem [`docs/huong-dan-su-dung.md`](docs/huong-dan-su-dung.md)).
+> Phần dưới chỉ còn đúng cho bản export web của `apps/mobile`.
 
 Đã kiểm chứng bằng cách đọc `dist/index.html` sau khi export. Trong `<div id="root">` có:
 
