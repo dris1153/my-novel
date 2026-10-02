@@ -6,6 +6,7 @@
     "mobile": "pnpm --filter mobile start",
     "mobile:web": "pnpm --filter mobile web",
     "admin": "pnpm --filter admin dev",
+    "web": "pnpm --filter web dev",
     "crawl": "pnpm --filter crawler crawl",
     "db:link": "supabase link",
     "db:push": "supabase db push",
