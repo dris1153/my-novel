@@ -5,6 +5,7 @@ Monorepo pnpm workspaces. Một codebase React Native chạy iOS/Android/Web, m�
 
 ```
 apps/mobile      Expo 57 + expo-router  → iOS, Android, Web (static render)
+apps/web         Next.js 16             → web đọc truyện public (SSR/ISR, SEO)
 apps/admin       Next.js 16             → trang quản trị
 packages/shared  types DB + helper thuần (slug tiếng Việt, tách chương)
 packages/crawler CLI crawl truyện từ truyenfull → Supabase
@@ -34,13 +35,15 @@ pnpm db:push                       # chạy migration
 ```bash
 cp apps/mobile/.env.example apps/mobile/.env
 cp apps/admin/.env.example  apps/admin/.env.local
+cp apps/web/.env.example    apps/web/.env.local
 ```
 
 **4. Chạy:**
 
 ```bash
 pnpm mobile        # Expo — bấm w để mở web, i/a cho iOS/Android
-pnpm admin         # http://localhost:3000
+pnpm web           # http://localhost:3000 — web đọc truyện
+pnpm admin         # http://localhost:3001 (nếu web đang chiếm 3000)
 ```
 
 ## Tạo tài khoản admin
@@ -87,6 +90,7 @@ Admin xin URL ký sẵn từ `/api/r2/presign` rồi upload thẳng từ browser
 | Lệnh | Việc |
 |---|---|
 | `pnpm mobile` / `pnpm mobile:web` | dev app |
+| `pnpm web` | dev web đọc truyện (`apps/web`) |
 | `pnpm admin` | dev admin |
 | `pnpm db:push` | đẩy migration mới lên project đã link |
 | `pnpm db:types` | sinh lại `packages/shared/src/database.types.ts` từ DB |
@@ -121,10 +125,12 @@ cp .env.example .env
 pnpm crawl https://truyenfull.live/dai-phung-da-canh-nhan/ --limit 10
 ```
 
-Truyện vào DB ở trạng thái **nháp** (`published=false`). Mở `pnpm admin` để duyệt rồi mới đăng.
+Truyện vào DB ở trạng thái **đã đăng** — mở `pnpm web` là đọc được ngay. Thêm `--draft`
+nếu muốn để nháp rồi tự duyệt trong `pnpm admin`.
 
 **3. Full truyện:** bỏ `--limit`. Chạy lại cùng lệnh nếu đứt giữa chừng — nó **skip chương đã có**
-và tiếp từ chỗ dừng (resume-safe).
+và tiếp từ chỗ dừng (resume-safe). Chạy lại để lấy chương mới của truyện đang ra cũng an toàn:
+trạng thái đăng và ảnh bìa **không** bị ghi đè.
 
 Ghi chú:
 - Genre nguồn không có trong bảng seed → log và bỏ qua (không tạo genre rác).
@@ -144,7 +150,10 @@ Ghi chú:
 | Đăng nhập trong app đọc | Đọc không cần tài khoản; tủ truyện + tiến độ thì cần |
 | Resize ảnh bìa | Đang upload nguyên bản, giới hạn 2MB. Thêm `sharp` khi băng thông thành vấn đề |
 
-## Giới hạn đã biết: SEO chỉ có phần khung
+## Giới hạn đã biết: SEO của bản Expo web chỉ có phần khung
+
+> **Đã giải ở `apps/web`.** Web public mới (Next.js, SSR/ISR) render nội dung thật —
+> xem `apps/web`. Phần dưới chỉ còn đúng cho bản export web của `apps/mobile`.
 
 Đã kiểm chứng bằng cách đọc `dist/index.html` sau khi export. Trong `<div id="root">` có:
 

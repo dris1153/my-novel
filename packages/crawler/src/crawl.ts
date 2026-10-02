@@ -13,10 +13,11 @@ import {
 const THROTTLE_MS = 1000; // delay giữa mỗi request chương, né rate-limit
 const MAX_CONSECUTIVE_ERRORS = 5;
 
-export type CrawlOptions = { limit?: number };
+export type CrawlOptions = { limit?: number; publish?: boolean };
 
 export async function crawl(listingUrl: string, opts: CrawlOptions = {}): Promise<void> {
   const base = listingUrl.replace(/\/$/, '');
+  const publish = opts.publish ?? true;
 
   console.log(`Đọc trang truyện: ${base}`);
   const meta = parseListingMeta(await fetchHtml(listingUrl));
@@ -24,9 +25,9 @@ export async function crawl(listingUrl: string, opts: CrawlOptions = {}): Promis
 
   const slug = slugify(meta.title);
   const coverUrl = await uploadCover(meta.coverUrl, slug);
-  const novelId = await upsertNovel(meta, coverUrl);
+  const novelId = await upsertNovel(meta, coverUrl, publish);
   await mapGenres(novelId, meta.genreSlugs);
-  console.log(`  novel id=${novelId} (nháp)`);
+  console.log(`  novel id=${novelId} (${publish ? 'đã đăng' : 'nháp'})`);
 
   // Gom link chương qua các trang /trang-N/.
   const links: ChapterLink[] = [];
@@ -64,15 +65,14 @@ export async function crawl(listingUrl: string, opts: CrawlOptions = {}): Promis
       }
     } catch (e) {
       if (e instanceof ChallengeError) {
-        console.error(`\n✖ ${e.message}`);
-        console.error(`  Đã lưu tới trước chương ${ch.number}. Chạy lại lệnh để tiếp tục.`);
-        process.exit(1);
+        // Ném để caller (CLI) quyết định thoát — không `process.exit` ở đây, vì hàm này
+        // còn được gọi từ tiến trình con của web.
+        throw new Error(`${e.message}\n  Đã lưu tới trước chương ${ch.number}. Chạy lại để tiếp tục.`);
       }
       consecutiveErrors++;
       console.warn(`  ⚠ chương ${ch.number} lỗi (${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}): ${e instanceof Error ? e.message : e}`);
       if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-        console.error(`\n✖ ${MAX_CONSECUTIVE_ERRORS} lỗi liên tiếp — dừng. Chạy lại lệnh để resume.`);
-        process.exit(1);
+        throw new Error(`${MAX_CONSECUTIVE_ERRORS} lỗi liên tiếp — dừng. Đã lưu tới trước chương ${ch.number}.`);
       }
     }
 
@@ -82,5 +82,8 @@ export async function crawl(listingUrl: string, opts: CrawlOptions = {}): Promis
     await sleep(THROTTLE_MS);
   }
 
-  console.log(`✓ Xong. Truyện "${meta.title}" đang ở trạng thái nháp — duyệt trong admin để đăng.`);
+  console.log(
+    `✓ Xong. Truyện "${meta.title}" hiện có ${all.length} chương` +
+      (publish ? ' và đã đăng.' : ' (nháp — duyệt trong admin để đăng).')
+  );
 }

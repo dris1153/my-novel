@@ -33,27 +33,51 @@ export type NovelMeta = {
   genreSlugs: string[];
 };
 
-/** Upsert truyện theo slug (nháp). Trả về id để ghi chương. */
-export async function upsertNovel(meta: NovelMeta, coverUrl: string | null): Promise<string> {
+/**
+ * Upsert truyện theo slug (trả về id để ghi chương).
+ *
+ * KHÔNG dùng thẳng `.upsert()` của PostgREST: nó UPDATE mọi cột đã truyền, nên crawl
+ * lại một truyện đã publish sẽ đẩy nó về nháp và xoá bìa. Tách insert/update:
+ * update chỉ đụng metadata, không bao giờ ghi `published`, chỉ ghi `cover_url` khi
+ * thực sự có bìa mới.
+ */
+export async function upsertNovel(
+  meta: NovelMeta,
+  coverUrl: string | null,
+  publish: boolean
+): Promise<string> {
   const slug = slugify(meta.title);
-  const { data, error } = await db()
+  const client = db();
+
+  const base = {
+    title: meta.title,
+    author: meta.author,
+    status: meta.status,
+    description: meta.description,
+  };
+
+  const { data: existing } = await client
     .from('novels')
-    .upsert(
-      {
-        slug,
-        title: meta.title,
-        author: meta.author,
-        status: meta.status,
-        description: meta.description,
-        cover_url: coverUrl,
-        published: false, // nháp — admin duyệt trước khi lên app
-      },
-      { onConflict: 'slug' }
-    )
+    .select('id')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (existing) {
+    const { error } = await client
+      .from('novels')
+      .update(coverUrl ? { ...base, cover_url: coverUrl } : base)
+      .eq('id', existing.id);
+    if (error) throw new Error(`upsertNovel(update): ${error.message}`);
+    return existing.id;
+  }
+
+  const { data, error } = await client
+    .from('novels')
+    .insert({ slug, ...base, cover_url: coverUrl, published: publish })
     .select('id')
     .single();
 
-  if (error) throw new Error(`upsertNovel: ${error.message}`);
+  if (error) throw new Error(`upsertNovel(insert): ${error.message}`);
   return data.id;
 }
 

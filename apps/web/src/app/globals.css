@@ -1,0 +1,304 @@
+@import "tailwindcss";
+
+/* next-themes gắn class `dark` lên <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Token thô ──────────────────────────────────────────────────────────
+   Light là nguồn chân lý (DESIGN.md). Dark suy ra từ đó: giữ đúng "chất"
+   nhưng nâng độ sáng của mực để đạt AA trên nền #141210. */
+:root {
+  --paper: #fffdf8;
+  --halo: #f9f9f9;
+  --ink: #0a0a0a;
+  --ink-2: #474747;
+  --ink-3: #8c8c8c;
+  --line: #e5e5e5;
+  --ash: #d1d1d1;
+
+  --sepia: #512906; /* fill CTA */
+  --sepia-text: #512906; /* chữ/link sepia */
+  --on-sepia: #fffdf8;
+  --sepia-soft: #f2ece3;
+
+  --violet: #242d64; /* feature panel — một cái/trang */
+  --on-violet: #fffdf8;
+
+  --forest: #0c3b1a;
+  --forest-soft: #eaf0ea;
+  --oxblood: #5e0831;
+  --margin: #ffc934; /* chỉ làm wash sau doodle */
+}
+
+html.dark {
+  --paper: #141210;
+  --halo: #1c1917;
+  --ink: #f3ede2;
+  --ink-2: #b3aaa0;
+  --ink-3: #8a8177; /* sáng hơn "smoke" để chữ phụ đạt AA trên nền tối */
+  --line: #2e2a26;
+  --ash: #3a352f;
+
+  --sepia: #a1572e; /* nâng sáng để nổi trên nền tối */
+  --sepia-text: #d99a6c;
+  --on-sepia: #fffdf8;
+  --sepia-soft: #2a1d14;
+
+  --violet: #2b356f;
+  --on-violet: #fffdf8;
+
+  --forest: #8fd0a3;
+  --forest-soft: #16281c;
+  --oxblood: #e0a1bb;
+  --margin: #ffc934;
+}
+
+/* ── Map sang utility Tailwind ──────────────────────────────────────────
+   `inline` là bắt buộc: nếu không, Tailwind chốt giá trị ở :root và
+   override của `.dark` sẽ không tới được utility. */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-halo: var(--halo);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-ash: var(--ash);
+  --color-sepia: var(--sepia);
+  --color-sepia-text: var(--sepia-text);
+  --color-on-sepia: var(--on-sepia);
+  --color-sepia-soft: var(--sepia-soft);
+  --color-violet: var(--violet);
+  --color-on-violet: var(--on-violet);
+  --color-forest: var(--forest);
+  --color-forest-soft: var(--forest-soft);
+  --color-oxblood: var(--oxblood);
+  --color-margin: var(--margin);
+
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  --font-read: var(--font-literata), Georgia, "Times New Roman", serif;
+
+  /* Một radius duy nhất cho chrome — DESIGN.md: "Keep all radii at 10px". */
+  --radius-lg: 10px;
+
+  --text-caption: 14px;
+  --text-caption--line-height: 1.43;
+  --text-body: 16px;
+  --text-body--line-height: 1.5;
+  --text-subheading: 20px;
+  --text-subheading--line-height: 1.5;
+  --text-heading-sm: 32px;
+  --text-heading-sm--line-height: 1.12;
+  --text-heading: 42px;
+  --text-heading--line-height: 1.1;
+  --text-display: 48px;
+  --text-display--line-height: 1.08;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--margin);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--sepia);
+  outline-offset: 2px;
+}
+
+/* Tailwind v4 Preflight bỏ cursor:pointer mặc định của button. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  a,
+  select:not(:disabled),
+  label:has(> input[type="checkbox"]),
+  label:has(> input[type="radio"]) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Motion — snippet dán nguyên từ skill `transitions-dev`
+   (.opencode/skills/transitions-dev). Chỉ dán transition thật sự dùng.
+   Mọi snippet đều giữ block `prefers-reduced-motion` của skill.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* accordion (21) */
+  --acc-expand: 250ms;
+  --acc-collapse: 250ms;
+  --acc-chevron: 250ms;
+  --acc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* like button (23) — màu tim là oxblood, không dùng hot pink ngoài palette */
+  --like-color: #5e0831;
+  --like-fill: 150ms;
+  --like-pop: 350ms;
+  --like-pop-ease: cubic-bezier(0.34, 1.96, 0.64, 1);
+  --like-particle-dur: 600ms;
+  --like-particle-dist: 20px;
+  --like-particle-size: 2.5px;
+  --like-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* skeleton (14) — chỉ phần pulse; Next thay cả cây khi loading xong nên
+     không dùng được nửa cross-fade của snippet. */
+  --pulse-dur: 1100ms;
+  --pulse-count: infinite;
+  --pulse-min: 0.45;
+}
+
+html.dark {
+  --like-color: #e0a1bb;
+}
+
+/* ── Accordion expand (21) ───────────────────────────────────────────── */
+.t-acc-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--acc-collapse) var(--acc-ease);
+}
+.t-acc[data-open="true"] .t-acc-panel {
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--acc-expand) var(--acc-ease);
+}
+.t-acc-panel-inner {
+  overflow: hidden;
+  opacity: 0;
+  filter: blur(2px);
+  transition:
+    opacity var(--acc-collapse) var(--acc-ease),
+    filter var(--acc-collapse) var(--acc-ease);
+}
+.t-acc[data-open="true"] .t-acc-panel-inner {
+  opacity: 1;
+  filter: blur(0);
+  transition:
+    opacity var(--acc-expand) var(--acc-ease),
+    filter var(--acc-expand) var(--acc-ease);
+}
+.t-acc-chevron {
+  display: inline-flex;
+  transform: scaleY(1);
+  transform-origin: center;
+  transition: transform var(--acc-chevron) var(--acc-ease);
+}
+.t-acc-chevron path {
+  vector-effect: non-scaling-stroke;
+}
+.t-acc[data-open="true"] .t-acc-chevron {
+  transform: scaleY(-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-acc-panel,
+  .t-acc-panel-inner,
+  .t-acc-chevron {
+    transition: none !important;
+  }
+}
+
+/* ── Like button (23) ────────────────────────────────────────────────── */
+.t-like-heart {
+  color: currentColor;
+  transition: color var(--like-fill) var(--like-ease);
+}
+.t-like-heart path {
+  fill: transparent;
+  stroke: currentColor;
+  transition:
+    fill var(--like-fill) var(--like-ease),
+    stroke var(--like-fill) var(--like-ease);
+}
+.t-like[data-liked="true"] .t-like-heart {
+  color: var(--like-color);
+}
+.t-like[data-liked="true"] .t-like-heart path {
+  fill: currentColor;
+}
+.t-like[data-liked="true"] .t-like-icon {
+  animation: t-like-pop var(--like-pop) var(--like-pop-ease);
+}
+@keyframes t-like-pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(0.82);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.t-like-particles {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  color: var(--like-color);
+}
+.t-like-particles i {
+  position: absolute;
+  left: calc(var(--like-particle-size) * var(--psize, 1) / -2);
+  top: calc(var(--like-particle-size) * var(--psize, 1) / -2);
+  width: calc(var(--like-particle-size) * var(--psize, 1));
+  height: calc(var(--like-particle-size) * var(--psize, 1));
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+}
+@keyframes t-like-burst {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(calc(var(--px) * 0.25), calc(var(--py) * 0.25)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--px), var(--py)) scale(var(--p-end-scale, 0.6));
+  }
+}
+.t-like.is-bursting .t-like-particles i {
+  animation: t-like-burst var(--pdur, var(--like-particle-dur)) ease-out var(--pdelay, 0ms) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-like-icon,
+  .t-like-particles i {
+    animation: none !important;
+  }
+}
+
+/* ── Skeleton pulse (14) ─────────────────────────────────────────────── */
+.t-skel-skeleton.is-pulsing > * {
+  animation: t-skel-pulse var(--pulse-dur) ease-in-out var(--pulse-count);
+}
+@keyframes t-skel-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: var(--pulse-min);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-skel-skeleton.is-pulsing > * {
+    animation: none !important;
+  }
+}
