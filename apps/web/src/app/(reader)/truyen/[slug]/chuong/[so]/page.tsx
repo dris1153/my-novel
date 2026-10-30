@@ -1,11 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { ReaderShell } from "@/components/reader/reader-shell";
-import { JsonLd } from "@/components/seo/json-ld";
 import { fetchChapter } from "@/lib/queries";
-import { chapterJsonLd } from "@/lib/seo";
+import { readMyStateOrEmpty } from "@/lib/state-store";
 
-export const revalidate = 3600;
+export const revalidate = 600;
 
 function parseNumber(raw: string): number | null {
   const n = Number(raw);
@@ -26,8 +25,6 @@ export async function generateMetadata({ params }: PageProps<"/truyen/[slug]/chu
   return {
     title: `${title} — ${data.novel.title}`,
     description,
-    alternates: { canonical: `/truyen/${slug}/chuong/${number}` },
-    openGraph: { title, description, type: "article" },
   };
 }
 
@@ -39,6 +36,9 @@ export default async function ChapterPage({ params }: PageProps<"/truyen/[slug]/
   const data = await fetchChapter(slug, number);
   if (!data) notFound();
 
+  const saved = (await readMyStateOrEmpty()).progress[slug];
+  const resumed = saved?.chapter === number;
+
   const paragraphs = data.chapter.content
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
@@ -46,24 +46,16 @@ export default async function ChapterPage({ params }: PageProps<"/truyen/[slug]/
 
   return (
     <>
-      <JsonLd
-        data={chapterJsonLd({
-          novelTitle: data.novel.title,
-          novelSlug: data.novel.slug,
-          number: data.chapter.number,
-          title: data.chapter.title,
-        })}
-      />
       <ReaderShell
-        novelId={data.novel.id}
         novelSlug={data.novel.slug}
         novelTitle={data.novel.title}
-        chapterId={data.chapter.id}
         chapterNumber={data.chapter.number}
         chapterTitle={data.chapter.title}
         total={data.total}
-        hasPrev={data.hasPrev}
-        hasNext={data.hasNext}>
+        prevNumber={data.prevNumber}
+        nextNumber={data.nextNumber}
+        initialScroll={resumed ? saved.scroll : 0}
+        alreadySaved={resumed}>
         {paragraphs.map((paragraph, index) => (
           <p key={index} style={{ marginBottom: "1em" }}>
             {paragraph}

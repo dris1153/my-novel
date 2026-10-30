@@ -1,8 +1,8 @@
 import { DoodleBook } from "@/components/doodles";
 import { NovelGridCard } from "@/components/novel/novel-card";
 import { ButtonLink } from "@/components/ui/button";
-import { requireUser } from "@/lib/auth";
-import type { NovelCard } from "@/lib/queries";
+import { fetchNovelCards } from "@/lib/queries";
+import { readMyState } from "@/lib/state-store";
 
 export const metadata = {
   title: "Tủ truyện",
@@ -10,19 +10,8 @@ export const metadata = {
 };
 
 export default async function LibraryPage() {
-  const { supabase, user } = await requireUser();
-
-  const { data } = await supabase
-    .from("library")
-    .select(
-      "novels(id, slug, title, author, cover_url, status, view_count, updated_at, featured, chapters(count))"
-    )
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  const novels = ((data ?? []) as unknown as { novels: NovelCard | null }[])
-    .map((row) => row.novels)
-    .filter((novel): novel is NovelCard => novel !== null);
+  const { library } = await readMyState();
+  const novels = await fetchNovelCards(library.map((e) => e.slug));
 
   return (
     <main className="mx-auto w-full max-w-[1200px] px-6 pt-10">
@@ -42,7 +31,7 @@ export default async function LibraryPage() {
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
           {novels.map((novel) => (
-            <NovelGridCard key={novel.id} novel={novel} />
+            <NovelGridCard key={novel.slug} novel={novel} />
           ))}
         </div>
       )}

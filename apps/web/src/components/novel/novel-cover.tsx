@@ -39,6 +39,8 @@ export function NovelCover({
           fill
           sizes={sizes}
           priority={priority}
+          // Bìa đã nén ≤600px/100KB lúc crawl; tối ưu lại chỉ thêm một lượt fetch qua route có đăng nhập.
+          unoptimized
           className="object-cover"
         />
       ) : (

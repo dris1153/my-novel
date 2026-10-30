@@ -9,6 +9,11 @@ test('slugify xử lý được dấu tiếng Việt và chữ đ', () => {
   assert.equal(slugify('Đường Đến Đỉnh Đồi'), 'duong-den-dinh-doi');
 });
 
+test('slugify cắt 80 ký tự không để lại dấu - ở cuối', () => {
+  const s = slugify(`${'a'.repeat(79)} b`);
+  assert.equal(s, 'a'.repeat(79));
+});
+
 test('splitChapters tách theo tiêu đề chương', () => {
   const raw = [
     'Lời tựa bị bỏ qua.',

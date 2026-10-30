@@ -7,12 +7,9 @@ import { ChapterPreview } from "@/components/novel/chapter-preview";
 import { DescriptionAccordion } from "@/components/novel/description-accordion";
 import { NovelActions } from "@/components/novel/novel-actions";
 import { NovelHero } from "@/components/novel/novel-hero";
-import { ViewCounter } from "@/components/novel/view-counter";
-import { JsonLd } from "@/components/seo/json-ld";
 import { PageCrumbs } from "@/components/ui/page-nav";
 import { SubHeading } from "@/components/ui/section-heading";
 import { fetchFirstChapterNumber, fetchNovel } from "@/lib/queries";
-import { bookJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 
 const PREVIEW_COUNT = 50;
 
@@ -28,8 +25,6 @@ export async function generateMetadata({ params }: PageProps<"/truyen/[slug]">) 
     description:
       novel.description?.slice(0, 160) ??
       `${novel.title} của ${novel.author} — đọc truyện online.`,
-    alternates: { canonical: `/truyen/${novel.slug}` },
-    openGraph: { title: novel.title, type: "book" },
   };
 }
 
@@ -38,38 +33,18 @@ export default async function NovelPage({ params }: PageProps<"/truyen/[slug]">)
   const novel = await fetchNovel(slug);
   if (!novel) notFound();
 
-  const firstNumber = await fetchFirstChapterNumber(novel.id);
+  const firstNumber = await fetchFirstChapterNumber(novel.slug);
 
-  const chapterTotal = novel.chapters?.[0]?.count ?? 0;
-  const genres = novel.novel_genres
-    .map((row) => row.genres)
-    .filter((genre): genre is { slug: string; name: string } => genre !== null);
+  const chapterTotal = novel.chapterCount;
 
   return (
     <main className="mx-auto w-full max-w-[1200px] px-6 pt-10">
-      <JsonLd
-        data={bookJsonLd({
-          title: novel.title,
-          author: novel.author,
-          slug: novel.slug,
-          description: novel.description,
-          coverUrl: novel.cover_url,
-        })}
-      />
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Trang chủ", path: "/" },
-          { name: novel.title, path: `/truyen/${novel.slug}` },
-        ])}
-      />
       <PageCrumbs items={[{ href: "/", label: "Trang chủ" }, { label: novel.title }]} />
 
-      <ViewCounter novelId={novel.id} />
-
-      <NovelHero novel={novel} chapterTotal={chapterTotal} genres={genres} />
+      <NovelHero novel={novel} chapterTotal={chapterTotal} genres={novel.genreList} />
 
       <div className="mt-8">
-        <NovelActions slug={novel.slug} novelId={novel.id} firstNumber={firstNumber} />
+        <NovelActions slug={novel.slug} firstNumber={firstNumber} />
       </div>
 
       {novel.description && <DescriptionAccordion text={novel.description} />}
@@ -86,7 +61,7 @@ export default async function NovelPage({ params }: PageProps<"/truyen/[slug]">)
 
         <div className="mt-4">
           <Suspense fallback={<ChapterListSkeleton />}>
-            <ChapterPreview slug={novel.slug} novelId={novel.id} limit={PREVIEW_COUNT} />
+            <ChapterPreview slug={novel.slug} limit={PREVIEW_COUNT} />
           </Suspense>
         </div>
       </section>

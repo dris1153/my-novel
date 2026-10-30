@@ -1,10 +1,10 @@
 import { parse, type HTMLElement } from 'node-html-parser';
-import type { NovelStatus } from 'shared';
+import type { StoredNovelStatus } from 'shared';
 
 export type ListingMeta = {
   title: string;
   author: string;
-  status: NovelStatus;
+  status: StoredNovelStatus;
   description: string | null;
   coverUrl: string | null;
   genreSlugs: string[];
@@ -18,7 +18,7 @@ function textOf(el: HTMLElement | null): string {
 }
 
 /** "Full" / "Hoàn thành" → completed; còn lại → ongoing. */
-function parseStatus(raw: string): NovelStatus {
+function parseStatus(raw: string): StoredNovelStatus {
   return /full|hoàn thành/i.test(raw) ? 'completed' : 'ongoing';
 }
 

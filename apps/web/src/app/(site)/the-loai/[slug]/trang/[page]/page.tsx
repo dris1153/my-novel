@@ -21,7 +21,6 @@ export async function generateMetadata({ params }: PageProps<"/the-loai/[slug]/t
   return {
     title: `${genre.name} — trang ${page}`,
     description: `Truyện thể loại ${genre.name}, trang ${page}.`,
-    alternates: { canonical: `/the-loai/${genre.slug}/trang/${page}` },
   };
 }
 

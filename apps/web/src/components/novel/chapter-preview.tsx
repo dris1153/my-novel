@@ -9,14 +9,12 @@ import { fetchChapterList } from "@/lib/queries";
  */
 export async function ChapterPreview({
   slug,
-  novelId,
   limit = 50,
 }: {
   slug: string;
-  novelId: string;
   limit?: number;
 }) {
-  const chapters = await fetchChapterList(novelId, {
+  const chapters = await fetchChapterList(slug, {
     limit,
     offset: 0,
     newestFirst: true,

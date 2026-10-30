@@ -1,45 +1,40 @@
 # Hướng dẫn sử dụng
 
-Dành cho **một người dùng, chạy ở localhost**. App để lưu và đọc lại truyện đã crawl về
-database của mình — không phải site truyện công khai.
+Web đọc truyện cho vài người quen, chạy trên Vercel. Truyện nằm trong repo GitHub private
+`novel-data`; người chủ thêm truyện bằng CLI trên máy mình.
 
-Cài đặt lần đầu (Supabase, env, tài khoản admin): xem [`README.md`](../README.md).
+Cài đặt lần đầu (repo data, token, Google OAuth, env, deploy): xem [`README.md`](../README.md).
 Trang này chỉ nói cách **dùng hằng ngày**.
 
 ---
 
-## 1. Chạy app
+## 1. Đăng nhập
 
-```bash
-pnpm web
-```
+Mở web → bấm **Đăng nhập bằng Google**. Chỉ email nằm trong `ALLOWED_EMAILS` mới vào được;
+email khác sẽ thấy "Email này chưa được cấp quyền truy cập".
 
-Mở **http://localhost:3000** → bấm **Đăng nhập** (góc phải) → `admin@skymail.ink` / `TestAdmin123!`
-
-Đăng nhập **một lần** thôi, cookie sống lâu. Cần đăng nhập vì tủ truyện và tiến độ đọc
-lưu theo tài khoản (`library`, `reading_progress`), RLS chặn theo `user_id`.
+- Tủ truyện và tiến độ đọc lưu theo tài khoản, đồng bộ giữa các thiết bị.
+- Thêm/bớt người dùng: sửa `ALLOWED_EMAILS` trên Vercel rồi redeploy. Email bị gỡ mất quyền
+  ngay cả khi đang đăng nhập.
 
 ---
 
-## 2. Thêm truyện
+## 2. Thêm truyện (chỉ người chủ, trên máy tính)
 
-Ở ô trên cùng trang chủ:
-
+```bash
+pnpm crawl <url>                 # cả truyện (~1s/chương; 2000 chương ≈ 35 phút)
+pnpm crawl <url> --limit 10      # thử 10 chương
 ```
-Dán link truyện trên truyenfull…          [ Lấy về ]
-```
 
-Ví dụ: `https://truyenfull.live/dai-phung-da-canh-nhan/`
+Ví dụ URL: `https://truyenfull.live/dai-phung-da-canh-nhan/`
 
-Bấm **Lấy về**:
-
-- Crawl chạy **nền** — không phải chờ, UI không bị khoá.
-- Mục **"Đang lấy về"** hiện số chương đang về, cập nhật mỗi 2 giây.
-- Truyện **tự động được đăng** — không có bước duyệt nháp.
-- Đọc được **ngay** khi có chương đầu tiên, phần còn lại chạy tiếp.
-
-Crawl chạy **độc lập với web server**: đóng browser hay tắt `pnpm web` thì nó vẫn tiếp tục.
-Mở lại rồi dán lại **cùng URL** là nó **resume** — bỏ qua chương đã có, không làm lại từ đầu.
+- CLI ghi file vào bản clone `novel-data` (đường dẫn trong `DATA_REPO_DIR` của `.env` gốc), cứ
+  100 chương thì commit và push `main`. Web thấy truyện mới sau tối đa ~10 phút.
+- `--limit` áp dụng **sau** khi bỏ qua chương đã có, nên mỗi lần chạy `--limit 10` sẽ lấy thêm
+  10 chương tiếp theo — dùng để lấy dần.
+- Chạy lại cùng URL để lấy chương mới của truyện đang ra, hoặc để tiếp tục sau khi bị ngắt.
+  Đánh dấu đề cử (`featured`) và ảnh bìa cũ không bị ghi đè.
+- Mỗi lần chỉ chạy một crawl trên cùng một clone.
 
 ---
 
@@ -62,73 +57,43 @@ Trong trình đọc:
 | `←` `→` | chương trước / chương sau (bàn phím) |
 | `Aa` | chỉnh **cỡ chữ** (6 mức), **nền** (Giấy / Ngả vàng / Đêm / Đen tuyền), **kiểu chữ** (Literata / Inter) |
 | `Mục lục` | nhảy tới chương bất kỳ |
-| Cuộn | **tự lưu vị trí** mỗi 5 giây; mở lại đúng chỗ đã dừng |
+| Cuộn | vị trí được lưu khi bạn ở lại chương vài giây, mỗi ~30 giây, và khi ẩn tab; mở lại đúng chỗ đã dừng |
 
-Thanh tiến độ nằm sát mép trên. Thanh công cụ tự ẩn khi cuộn xuống.
-Tuỳ chỉnh đọc lưu trên máy (`localStorage`), không cần đăng nhập.
+Tuỳ chỉnh đọc (cỡ chữ, nền, kiểu chữ) lưu trên trình duyệt (`localStorage`), không đồng bộ giữa thiết bị.
 
 ---
 
-## 4. Các trang khác
+## 4. Các trang
 
 | Đường dẫn | Nội dung |
 |---|---|
-| `/` | Thư viện: đang đọc + đang lấy về + tất cả truyện |
+| `/` | "Đang đọc" + tất cả truyện (mới cập nhật trước) |
 | `/tu-truyen` | Chỉ những truyện đã bấm ♡ |
 | `/the-loai` | Duyệt theo thể loại |
-| `/tim-kiem` | Tìm theo tên truyện hoặc tác giả |
-| `/toi` | Đổi tên hiển thị, đăng xuất |
+| `/tim-kiem` | Tìm theo tên truyện hoặc tác giả (không cần gõ dấu) |
+| `/toi` | Thông tin tài khoản, đăng xuất |
 
 ---
 
-## 5. Dùng CLI (thay cho ô dán URL)
-
-```bash
-pnpm crawl <url>                 # cả truyện (~1s/chương; 2000 chương ≈ 35 phút)
-pnpm crawl <url> --limit 10      # thử 10 chương
-pnpm crawl <url> --draft         # để nháp thay vì tự đăng
-```
-
-`--limit` áp dụng **sau** khi bỏ qua chương đã có, nên mỗi lần chạy `--limit 10` sẽ lấy
-thêm 10 chương tiếp theo — dùng để lấy dần.
-
-Chạy lại cùng URL bất cứ lúc nào để lấy chương mới của truyện đang ra. An toàn: trạng thái
-đăng và ảnh bìa **không** bị ghi đè.
-
-CLI đọc `.env` ở **root** (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) — file này gitignored
-và **chỉ** dành cho crawler, không đưa vào env của `apps/web` hay `apps/admin`.
-
----
-
-## 6. Sự cố thường gặp
+## 5. Sự cố thường gặp
 
 | Hiện tượng | Xử lý |
 |---|---|
-| Mục "Đang lấy về" biến mất nhưng truyện chưa đủ chương | Bình thường — phần hiển thị nằm trong bộ nhớ server, restart là mất. Dán lại URL để chạy tiếp (resume) |
 | Crawl dừng, log có `ChallengeError` | truyenfull chặn tạm (Cloudflare). Chờ vài phút rồi chạy lại |
-| Truyện không có ảnh bìa | Chưa cấu hình R2 — dùng bìa màu sinh từ tên truyện |
-| Log báo `genre không có trong DB, bỏ qua: …` | Thể loại nguồn chưa có trong bảng `genres` |
-| Trang trắng / lỗi env | Thiếu `apps/web/.env.local` — xem `README.md` |
-| Bấm "Lấy về" không phản hồi | Kiểm đã đăng nhập chưa (form yêu cầu đăng nhập) |
+| Crawl báo `DATA_REPO_DIR … không dùng được` | Đường dẫn phải là thư mục gốc của clone `novel-data`, đang ở nhánh `main` |
+| Log báo `genre không có trong index.json, bỏ qua: …` | Thêm thể loại đó vào `genres` trong `index.json` của repo data |
+| Truyện crawl xong chưa hiện trên web | Chờ tối đa ~10 phút (cache) |
+| Truyện không có ảnh bìa | Nguồn không có bìa hoặc tải thất bại; web dùng bìa màu sinh từ tên truyện |
+| Vào web bị đẩy về trang đăng nhập liên tục | Email chưa có trong `ALLOWED_EMAILS` (hoặc biến đang trống) |
+| Lỗi "Không đọc được index.json" | Sai `GITHUB_DATA_REPO` / `GITHUB_DATA_TOKEN`, hoặc token thiếu quyền trên repo |
+| Trang trắng / lỗi thiếu env | Thiếu `apps/web/.env.local` — xem `README.md` |
 
 ---
 
-## 7. Bảo mật
+## 6. Bảo mật
 
-`SUPABASE_SERVICE_ROLE_KEY` trong root `.env` **bypass toàn bộ RLS** — đọc/ghi/xoá được mọi
-thứ trong database.
-
-- Không commit. Không copy sang `apps/web/.env.local` hay `apps/admin/.env.local`.
-- Chỉ dùng cho `pnpm crawl` và tiến trình con của nó.
-- Nghi ngờ lộ thì vào Dashboard → API Keys → rotate, rồi sửa lại một dòng trong root `.env`.
-
----
-
-## 8. Những thứ còn trong code nhưng không cần dùng
-
-| | Ghi chú |
-|---|---|
-| `pnpm admin` (`apps/admin`) | Đã revert về nguyên trạng; vẫn chạy được nếu muốn sửa truyện/chương bằng tay |
-| Đăng ký công khai (`/dang-ky`) | Không cần cho 1 người; Supabase còn bật "Confirm email" nên cũng khó tự đăng ký |
-| Sitemap / SEO / `robots.txt` | Vô nghĩa khi chỉ chạy localhost |
-| Cột `novels.featured` | Panel "Đề cử tuần" đã bỏ khỏi trang chủ |
+- Repo `novel-data` **luôn để private**: chứa truyện dịch có bản quyền.
+- `GITHUB_DATA_TOKEN` có quyền ghi vào repo data. Chỉ đặt trong env của Vercel và `apps/web/.env.local`
+  (gitignored), không bao giờ dùng tiền tố `NEXT_PUBLIC_`. Nghi ngờ lộ thì thu hồi token trên GitHub
+  và tạo cái mới.
+- Mọi trang và API đều đứng sau đăng nhập; nội dung không được index bởi công cụ tìm kiếm.

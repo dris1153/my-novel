@@ -1,33 +1,25 @@
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-import { hasSupabaseConfig, supabaseAnonKey, supabaseUrl } from "@/lib/supabase/config";
+import { auth } from "@/auth";
+import { isAllowedEmail } from "@/lib/identity";
 
 /**
- * Next 16 đổi tên `middleware` thành `proxy`. Ở đây chỉ gia hạn session Supabase;
- * phân quyền thật nằm ở `requireUser()` phía server.
+ * Gate toàn site: nội dung truyện có bản quyền, chỉ người trong ALLOWED_EMAILS được xem.
+ * Server Action/route vẫn tự gọi `requireUser()`.
  */
-export async function proxy(request: NextRequest) {
-  const response = NextResponse.next({ request });
+export const proxy = auth((req) => {
+  const { pathname } = req.nextUrl;
+  if (pathname === "/dang-nhap" || pathname.startsWith("/api/auth/")) return;
+  if (req.auth?.user?.id && isAllowedEmail(req.auth.user.email)) return;
 
-  // Thiếu env thì không có session để gia hạn — tránh gọi mạng vô ích.
-  if (!hasSupabaseConfig) return response;
+  if (pathname.startsWith("/api/")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll: () => request.cookies.getAll(),
-      setAll(list) {
-        list.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-      },
-    },
-  });
+  const url = new URL("/dang-nhap", req.nextUrl);
+  if (pathname !== "/") url.searchParams.set("from", pathname + req.nextUrl.search);
+  return NextResponse.redirect(url);
+});
 
-  // Bắt buộc gọi getUser() để token được refresh và ghi lại vào cookie.
-  await supabase.auth.getUser();
-
-  return response;
-}
-
+// Không loại trừ theo đuôi file; chỉ miễn file tĩnh build ra. Xem gate.test.ts.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webp)$).*)"],
+  matcher: ["/((?!_next/static|favicon\\.ico).*)"],
 };

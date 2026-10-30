@@ -3,19 +3,8 @@ node_modules/
 .env*.local
 *.log
 
-# expo
-.expo/
-apps/mobile/dist/
-apps/mobile/android/
-apps/mobile/ios/
-
 # next
 .next/
-apps/admin/out/
-
-# supabase
-supabase/.branches/
-supabase/.temp/
 
 .DS_Store
 .opencode/skills/transitions-dev/_root.css

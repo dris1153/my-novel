@@ -1,4 +1,4 @@
-import { NOVEL_STATUS_LABEL, formatCount, timeAgo } from "shared";
+import { NOVEL_STATUS_LABEL, timeAgo } from "shared";
 
 import { NovelCover } from "./novel-cover";
 
@@ -29,7 +29,7 @@ export function NovelHero({
       <div className="relative flex gap-5 md:gap-7">
         <div className="w-[104px] shrink-0 md:w-[140px]">
           <NovelCover
-            uri={novel.cover_url}
+            uri={novel.coverUrl}
             title={novel.title}
             seed={novel.slug}
             sizes="140px"
@@ -59,8 +59,7 @@ export function NovelHero({
 
           <dl className="mt-5 flex gap-7">
             <Stat value={String(chapterTotal)} label="Chương" />
-            <Stat value={formatCount(novel.view_count)} label="Lượt đọc" />
-            <Stat value={timeAgo(novel.updated_at)} label="Cập nhật" />
+            <Stat value={timeAgo(novel.updatedAt)} label="Cập nhật" />
           </dl>
         </div>
       </div>
