@@ -1,13 +1,12 @@
 import { crawl } from './crawl.ts';
 
-function parseArgs(argv: string[]): { url: string; limit?: number; draft: boolean } {
+function parseArgs(argv: string[]): { url: string; limit?: number } {
   const args = argv.slice(2);
   const url = args.find((a) => !a.startsWith('--'));
   const limitFlag = args.find((a) => a.startsWith('--limit'));
-  const draft = args.includes('--draft');
 
   if (!url) {
-    console.error('Dùng: pnpm crawl <url truyenfull> [--limit N] [--draft]');
+    console.error('Dùng: pnpm crawl <url truyenfull> [--limit N]');
     process.exit(1);
   }
   if (!/^https?:\/\/truyenfull\.[a-z]+\//i.test(url)) {
@@ -25,20 +24,20 @@ function parseArgs(argv: string[]): { url: string; limit?: number; draft: boolea
     }
   }
 
-  return { url, limit, draft };
+  return { url, limit };
 }
 
-// Env từ root .env (service_role chỉ sống ở đây, file cục bộ gitignored).
+// Env từ root .env (DATA_REPO_DIR; file cục bộ gitignored).
 // Không có file cũng được — env có thể đến từ shell.
 try {
   process.loadEnvFile?.(new URL('../../../.env', import.meta.url));
 } catch {
-  // .env không tồn tại; writer.ts sẽ báo rõ nếu thiếu biến bắt buộc.
+  // .env không tồn tại; store-writer.ts sẽ báo rõ nếu thiếu biến bắt buộc.
 }
 
-const { url, limit, draft } = parseArgs(process.argv);
+const { url, limit } = parseArgs(process.argv);
 
-crawl(url, { limit, publish: !draft }).catch((e) => {
+crawl(url, { limit }).catch((e) => {
   console.error(`✖ ${e instanceof Error ? e.message : e}`);
   process.exit(1);
 });

@@ -56,7 +56,8 @@ export async function fetchHtml(url: string, retries = 3): Promise<string> {
 /** Tải ảnh bìa về Buffer. Trả null nếu lỗi — cover không được chặn cả job. */
 export async function fetchImage(url: string): Promise<{ buffer: Buffer; contentType: string } | null> {
   try {
-    const res = await fetch(url, { headers: { 'User-Agent': UA } });
+    // Ảnh bìa chặn hotlink: không có Referer thì 403.
+    const res = await fetch(url, { headers: { 'User-Agent': UA, Referer: new URL(url).origin.replace('static.', '') + '/' } });
     if (!res.ok) return null;
     const contentType = res.headers.get('content-type') || 'image/jpeg';
     return { buffer: Buffer.from(await res.arrayBuffer()), contentType };
