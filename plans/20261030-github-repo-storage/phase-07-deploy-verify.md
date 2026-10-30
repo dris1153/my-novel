@@ -1,7 +1,7 @@
 ---
 phase: 7
 title: "Deploy Vercel + verify"
-status: pending
+status: in-progress
 priority: P1
 effort: "2h"
 dependencies: [6]
@@ -15,6 +15,12 @@ dependencies: [6]
 ## Requirements
 - Functional: toàn bộ success criteria của plan.md đạt trên URL Vercel.
 - Non-functional: không secret nào trong repo code; env chỉ ở Vercel.
+
+## Đã kiểm trước khi deploy (local, env thật)
+- [x] `next build` + `next start`: chưa đăng nhập → 307/401; session whitelist → 200 mọi trang
+- [x] OAuth redirect tới Google đúng client + redirect_uri (không `redirect_uri_mismatch`)
+- [x] Code đã push, PR #2 (`feat/github-storage` → `main`)
+- Lưu ý: ngoài Vercel, production server cần `AUTH_TRUST_HOST=true` (Vercel tự có)
 
 ## Implementation Steps
 1. Vercel project: Root Directory `apps/web`, pnpm, Node 22; bật "include files outside root" (cần `packages/shared`).

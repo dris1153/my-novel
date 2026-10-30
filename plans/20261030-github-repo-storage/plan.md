@@ -41,7 +41,7 @@ repo **private** `novel-data`. Crawler local push thẳng `main`. State người
 | 4 | [Google login + whitelist + gate](phase-04-auth-whitelist.md) | done (chờ Google client ID) | Chỉ email whitelist vào được site |
 | 5 | [State: tủ truyện + tiến độ](phase-05-user-state.md) | done | Library/progress ghi vào branch `state` |
 | 6 | [Dọn dẹp](phase-06-cleanup.md) | done | Hết Supabase/R2/admin/SEO trong code + docs |
-| 7 | [Deploy + verify](phase-07-deploy-verify.md) | pending | Chạy trên Vercel, test end-to-end |
+| 7 | [Deploy + verify](phase-07-deploy-verify.md) | in-progress (chờ deploy Vercel) | Chạy trên Vercel, test end-to-end |
 
 Phụ thuộc: 1 → (2, 3) · 3 → 4 → 5 · 6 sau 2–5 · 7 cuối.
 Phase 2 và 3 sửa file khác nhau → làm song song được sau phase 1.
