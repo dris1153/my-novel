@@ -1,181 +1,116 @@
 # Novel — app đọc truyện
 
-Monorepo pnpm workspaces. Một codebase React Native chạy iOS/Android/Web, một admin Next.js
-để đăng truyện, Supabase làm database + auth, Cloudflare R2 lưu ảnh bìa.
+Monorepo pnpm workspaces. Web đọc truyện (Next.js, deploy Vercel) cho vài người quen, một CLI
+crawl truyện từ truyenfull. **Không có database**: toàn bộ truyện, ảnh bìa và tiến độ đọc nằm
+trong repo GitHub private riêng `novel-data`.
 
 ```
-apps/mobile      Expo 57 + expo-router  → iOS, Android, Web (static render)
-apps/web         Next.js 16             → app đọc truyện cá nhân (chạy local)
-apps/admin       Next.js 16             → trang quản trị
-packages/shared  types DB + helper thuần (slug tiếng Việt, tách chương)
-packages/crawler CLI crawl truyện từ truyenfull → Supabase
-supabase/        migration
+apps/web         Next.js 16 — app đọc, gate bằng Google login + whitelist email
+packages/shared  type + hàm thuần (slug tiếng Việt, đường dẫn trong repo data)
+packages/crawler CLI crawl truyenfull → ghi file vào bản clone repo data → git push
 docs/            hướng dẫn sử dụng + wireframe
 ```
 
-**Hướng dẫn dùng app đọc hằng ngày: [`docs/huong-dan-su-dung.md`](docs/huong-dan-su-dung.md)**
+**Hướng dẫn dùng hằng ngày: [`docs/huong-dan-su-dung.md`](docs/huong-dan-su-dung.md)**
+
+## Kiến trúc
+
+```
+máy bạn:  pnpm crawl <url> ──ghi file──► clone novel-data ──git push main──┐
+                                                                            ▼
+Vercel:   apps/web ──GitHub Contents API (token ở server, cache 10 phút)──► repo novel-data (private)
+             │                                                               ▲
+             └── tiến độ / tủ truyện: ghi file state/<userId>.json ──────────┘ (branch `state`)
+```
+
+Repo `novel-data`:
+
+```
+index.json                        danh sách truyện + thể loại (crawler sinh, đừng sửa tay)
+novels/<slug>/meta.json           tên, tác giả, mô tả, thể loại, featured…
+novels/<slug>/cover.jpg           bìa đã nén ≤100KB
+novels/<slug>/chapters.json       mục lục [{ n, title }]
+novels/<slug>/chapters/00001.txt  nội dung chương
+branch state: state/<userId>.json tủ truyện + tiến độ đọc của từng người
+```
+
+Định dạng chính xác và hàm dựng đường dẫn: [`packages/shared/src/store.ts`](packages/shared/src/store.ts).
 
 ## Chạy lần đầu
 
-Cần Node 22+. Dùng Supabase hosted nên **không cần Docker**.
+Cần Node 22+ và pnpm 11.
 
-**1. Tạo project** tại [supabase.com/dashboard](https://supabase.com/dashboard) → New project.
-Ghi lại database password, và lấy project ref trong URL dashboard
-(`.../project/<ref>` — chuỗi ~20 ký tự).
+**1. Repo data.** Tạo repo GitHub **private** (vd `<you>/novel-data`) với 2 branch:
 
-**2. Đẩy schema lên:**
+- `main`: một commit có `index.json` = `{ "updatedAt": null, "genres": [ {"slug","name"}… ], "novels": [] }`
+  (danh sách thể loại: tiên hiệp, kiếm hiệp, ngôn tình, đô thị, trinh thám, huyền huyễn,
+  khoa huyễn, tâm lý, gia đình, lịch sử — thêm thể loại khác bằng cách sửa `genres` ở đây).
+- `state`: branch orphan chỉ có `state/.gitkeep`
+  (`git checkout --orphan state && git rm -rf . && mkdir state && touch state/.gitkeep && git add . && git commit -m "init state" && git push -u origin state`).
+
+Clone repo về cạnh repo này (vd `../novel-data`, đang ở `main`).
+
+**2. Token cho web.** GitHub → Settings → Developer settings → Fine-grained tokens: chỉ repo
+`novel-data`, quyền **Contents: Read and write**.
+
+**3. Google OAuth.** Google Cloud Console → tạo OAuth client loại *Web*. Redirect URI:
+`http://localhost:3000/api/auth/callback/google` (và `<url vercel>/api/auth/callback/google`).
+
+**4. Env.**
 
 ```bash
 pnpm install
-pnpm dlx supabase login
-pnpm db:link --project-ref <ref>   # hỏi database password
-pnpm db:push                       # chạy migration
+cp .env.example .env                        # crawler: DATA_REPO_DIR
+cp apps/web/.env.example apps/web/.env.local # web: GITHUB_DATA_*, AUTH_*, ALLOWED_EMAILS
 ```
 
-**3. Điền env.** Lấy URL + anon key ở Dashboard → Project Settings → API Keys:
+`AUTH_SECRET` sinh bằng `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`.
+`ALLOWED_EMAILS` là danh sách email được vào (ngăn cách bằng dấu phẩy); **để trống = không ai vào được**.
+
+**5. Chạy.**
 
 ```bash
-cp apps/mobile/.env.example apps/mobile/.env
-cp apps/admin/.env.example  apps/admin/.env.local
-cp apps/web/.env.example    apps/web/.env.local
+pnpm crawl https://truyenfull.live/<ten-truyen>/ --limit 10   # thử 10 chương
+pnpm web                                                     # http://localhost:3000
 ```
-
-**4. Chạy:**
-
-```bash
-pnpm mobile        # Expo — bấm w để mở web, i/a cho iOS/Android
-pnpm web           # http://localhost:3000 — web đọc truyện
-pnpm admin         # http://localhost:3001 (nếu web đang chiếm 3000)
-```
-
-## Tạo tài khoản admin
-
-Dashboard → Authentication → Add user → tạo email/password. Rồi vào SQL Editor nâng quyền:
-
-```sql
-update profiles set role = 'admin' where id = '<user-id>';
-```
-
-Mọi user mới mặc định là `reader`. RLS chỉ cho `admin` ghi vào `novels`/`chapters`.
-
-## Cloudflare R2
-
-1. Tạo bucket (mặc định `novel-covers`).
-2. R2 → Manage API Tokens → tạo token quyền **Object Read & Write**.
-3. Điền `R2_*` vào `apps/admin/.env.local`.
-4. Bật public access cho bucket hoặc map custom domain, rồi đặt vào `R2_PUBLIC_URL`.
-5. Thêm CORS cho bucket, nếu không browser sẽ không PUT được:
-
-```json
-[{ "AllowedOrigins": ["http://localhost:3000"], "AllowedMethods": ["PUT"], "AllowedHeaders": ["content-type"] }]
-```
-
-## Đổi schema
-
-Sửa SQL bằng cách **thêm file migration mới**, không sửa file cũ đã push:
-
-```bash
-pnpm dlx supabase migration new ten_thay_doi   # tạo file rỗng trong supabase/migrations/
-# viết SQL vào đó
-pnpm db:push
-pnpm db:types                                  # đồng bộ lại type
-```
-
-`database.types.ts` hiện đang viết tay để bootstrap — lần chạy `db:types` đầu tiên sẽ ghi đè
-nó bằng bản sinh tự động từ DB thật.
-
-Admin xin URL ký sẵn từ `/api/r2/presign` rồi upload thẳng từ browser lên R2 — file không
-đi qua Next server.
 
 ## Lệnh
 
 | Lệnh | Việc |
 |---|---|
-| `pnpm mobile` / `pnpm mobile:web` | dev app |
-| `pnpm web` | dev web đọc truyện (`apps/web`) |
-| `pnpm admin` | dev admin |
-| `pnpm db:push` | đẩy migration mới lên project đã link |
-| `pnpm db:types` | sinh lại `packages/shared/src/database.types.ts` từ DB |
+| `pnpm web` | dev web |
+| `pnpm crawl <url> [--limit N]` | crawl truyện vào repo data, push `main` theo lô 100 chương |
+| `pnpm test` | test `shared`, `crawler`, `web` (`node --test`) |
 | `pnpm typecheck` | typecheck cả workspace |
-| `pnpm test` | test helper |
-| `pnpm crawl <url> [--limit N]` | crawl truyện từ truyenfull vào Supabase |
-| `pnpm --filter mobile build:web` | export web tĩnh ra `apps/mobile/dist` |
+| `pnpm --filter web lint` | lint web |
+| `pnpm --filter web build` | build production |
 
-> `.npmrc` đặt `node-linker=hoisted`. **Đừng bỏ dòng này** — node_modules symlink mặc định
-> của pnpm làm Metro không resolve được transitive dependency của React Native. Vẫn giữ được
-> store chung nên không mất lợi thế dung lượng của pnpm.
+> Máy nào `next dev` (Turbopack) báo lỗi `next/font/google` thì chạy `pnpm --filter web exec next dev --webpack`.
+> Build production không bị lỗi này.
 
-## Crawl truyện từ truyenfull
+## Deploy Vercel
 
-CLI cục bộ import full 1 truyện từ truyenfull.live vào Supabase (ghi bằng `service_role`,
-bìa lên R2). Chạy trên máy — KHÔNG deploy, KHÔNG chạy trong admin (2100 chương/40-70 phút
-vượt xa timeout serverless).
+- Root Directory `apps/web`, bật "Include source files outside of the Root Directory" (cần `packages/shared`).
+- Env Production: `GITHUB_DATA_REPO`, `GITHUB_DATA_TOKEN`, `AUTH_SECRET` (sinh riêng cho prod),
+  `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `ALLOWED_EMAILS`.
+- Thêm redirect URI của domain Vercel vào OAuth client. Preview deploy cần redirect URI và env riêng.
+- Đổi `ALLOWED_EMAILS` → redeploy. Email bị gỡ mất quyền ngay cả khi đang đăng nhập.
 
-**1. Env.** Crawler đọc root `.env` (khác với env per-app):
+## Crawl
 
-```bash
-cp .env.example .env
-# điền SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (Dashboard → Settings → API Keys → service_role),
-# và R2_* (dùng lại bucket ảnh bìa của admin)
-```
+CLI chạy trên máy (2000 chương ≈ 35 phút, không chạy được trên serverless). Resume-safe: bỏ qua
+chương đã có, chạy lại cùng URL để lấy chương mới. Web thấy dữ liệu mới sau tối đa ~10 phút (cache).
 
-`service_role` bypass toàn bộ RLS — file `.env` đã gitignore, đừng commit, đừng đưa vào app.
+- Cloudflare chặn giữa chừng → dừng sạch, chạy lại lệnh để tiếp tục.
+- Thể loại nguồn không có trong `index.json` → log và bỏ qua.
+- Credit dịch giả trong nội dung được giữ nguyên.
+- Chỉ chạy một lần crawl cho mỗi clone tại một thời điểm.
+- Pháp lý: crawl và đăng lại truyện dịch có bản quyền là quyết định của bạn; repo luôn để private.
 
-**2. Chạy thử 10 chương trước:**
+## Giới hạn đã biết
 
-```bash
-pnpm crawl https://truyenfull.live/dai-phung-da-canh-nhan/ --limit 10
-```
-
-Truyện vào DB ở trạng thái **đã đăng** — mở `pnpm web` là đọc được ngay. Thêm `--draft`
-nếu muốn để nháp rồi tự duyệt trong `pnpm admin`.
-
-**3. Full truyện:** bỏ `--limit`. Chạy lại cùng lệnh nếu đứt giữa chừng — nó **skip chương đã có**
-và tiếp từ chỗ dừng (resume-safe). Chạy lại để lấy chương mới của truyện đang ra cũng an toàn:
-trạng thái đăng và ảnh bìa **không** bị ghi đè.
-
-Ghi chú:
-- Genre nguồn không có trong bảng seed → log và bỏ qua (không tạo genre rác).
-- Credit dịch giả trong nội dung được **giữ nguyên**.
-- Cloudflare bật JS challenge giữa chừng → dừng sạch, chạy lại lệnh để resume. Không có cơ chế
-  vượt captcha (ngoài phạm vi).
-- Pháp lý: crawl + đăng lại truyện dịch có bản quyền là quyết định của bạn.
-
-## Những chỗ đã cố ý làm đơn giản
-
-| Bỏ qua | Thêm khi nào |
-|---|---|
-| TanStack Query — mỗi màn tự fetch | Khi back tới back lui thấy chớp trắng khó chịu |
-| NativeWind — dùng thẳng `constants/theme.ts` + `useBreakpoint()` | Khi số biến thể style vượt tầm kiểm soát |
-| Bảng ratings — mới có `view_count` | Khi cần xếp hạng theo điểm người đọc |
-| `chapter_count` denormalized | Chưa cần, đang dùng `chapters(count)` của PostgREST |
-| Đăng nhập trong app đọc | Đọc không cần tài khoản; tủ truyện + tiến độ thì cần |
-| Resize ảnh bìa | Đang upload nguyên bản, giới hạn 2MB. Thêm `sharp` khi băng thông thành vấn đề |
-
-## Giới hạn đã biết: SEO của bản Expo web chỉ có phần khung
-
-> **`apps/web` không dính giới hạn này.** Nó là app đọc cá nhân chạy local, render nội dung
-> thật ở phía server — nhưng **không nhắm tới SEO** (xem [`docs/huong-dan-su-dung.md`](docs/huong-dan-su-dung.md)).
-> Phần dưới chỉ còn đúng cho bản export web của `apps/mobile`.
-
-Đã kiểm chứng bằng cách đọc `dist/index.html` sau khi export. Trong `<div id="root">` có:
-
-```
-Truyện · Trang chủ · Tủ truyện · Tìm truyện, tác giả…   ← header, render được
-<spinner>                                              ← thân trang
-```
-
-Header render ở SSR, **thân trang thì không**. Mọi màn hình fetch dữ liệu trong `useEffect`
-và render spinner trong lúc chờ, nên HTML tĩnh chỉ có khung điều hướng — không có tên
-truyện, không có nội dung chương.
-
-Bot không chạy JS sẽ index được menu chứ không index được thứ người ta tìm kiếm. Site
-truyện sống bằng traffic organic vào trang chương, nên đây là hạn chế thật.
-
-Ba đường đi tiếp, theo thứ tự công sức:
-
-1. `generateStaticParams` trong route động → prerender HTML thật cho từng truyện. Đổi lại:
-   mỗi lần đăng truyện mới phải rebuild, và build sẽ chậm dần theo số chương.
-2. Đổi `web.output` sang `"server"`, deploy lên Node host → SSR theo request, không cần rebuild.
-3. Cho Next.js admin phục vụ luôn trang đọc public (phương án đã cân nhắc lúc đầu) → SEO mạnh
-   nhất nhưng phải viết hai lần UI reader.
+- Mỗi lần lưu tiến độ là một commit trên branch `state` (đã throttle: ở lại chương ≥5 giây, tối đa 30 giây/lần,
+  và khi ẩn tab). GitHub giới hạn ~80 lần ghi/phút cho mỗi token.
+- Repo GitHub khuyến nghị dưới ~1GB: một truyện dài khoảng 8MB sau nén, dưới ~50 truyện là ổn.
+- Tìm kiếm khớp chuỗi liên tục trên tên truyện/tác giả (không dấu), không full-text.
+- Không có lượt đọc, xếp hạng, đề cử tuần.
