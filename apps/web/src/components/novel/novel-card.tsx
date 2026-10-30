@@ -3,7 +3,7 @@ import { timeAgo } from "shared";
 
 import { NovelCover } from "./novel-cover";
 
-import { chapterCount, type NovelCard } from "@/lib/queries";
+import type { NovelCard } from "@/lib/queries";
 
 const GRID_SIZES = "(min-width:1024px) 16vw, (min-width:640px) 30vw, 45vw";
 
@@ -11,7 +11,7 @@ export function NovelGridCard({ novel, priority }: { novel: NovelCard; priority?
   return (
     <Link href={`/truyen/${novel.slug}`} className="group block">
       <NovelCover
-        uri={novel.cover_url}
+        uri={novel.coverUrl}
         title={novel.title}
         seed={novel.slug}
         sizes={GRID_SIZES}
@@ -21,7 +21,7 @@ export function NovelGridCard({ novel, priority }: { novel: NovelCard; priority?
         {novel.title}
       </h3>
       <p className="mt-1 text-xs text-ink-3">
-        {chapterCount(novel)} chương · {timeAgo(novel.updated_at)}
+        {novel.chapterCount} chương · {timeAgo(novel.updatedAt)}
       </p>
     </Link>
   );
@@ -34,7 +34,7 @@ export function NovelListRow({ novel }: { novel: NovelCard }) {
       className="group flex gap-4 border-t border-line py-4">
       <div className="w-12 shrink-0">
         <NovelCover
-          uri={novel.cover_url}
+          uri={novel.coverUrl}
           title={novel.title}
           seed={novel.slug}
           sizes="48px"
@@ -46,7 +46,7 @@ export function NovelListRow({ novel }: { novel: NovelCard }) {
         </h3>
         <p className="truncate text-sm text-ink-2">{novel.author}</p>
         <p className="mt-0.5 text-xs text-ink-3">
-          {chapterCount(novel)} chương · {timeAgo(novel.updated_at)}
+          {novel.chapterCount} chương · {timeAgo(novel.updatedAt)}
         </p>
       </div>
     </Link>

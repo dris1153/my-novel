@@ -5,7 +5,7 @@ import { useState } from "react";
 /**
  * Mô tả truyện — accordion CSS nguyên từ skill transitions-dev (21-accordion):
  * panel giãn bằng `grid-template-rows: 0fr ↔ 1fr`, chevron lật `scaleY`.
- * Mặc định mở để phần mô tả vẫn nằm trong HTML đầu tiên (SEO).
+ * Mặc định mở.
  */
 export function DescriptionAccordion({ text }: { text: string }) {
   const [open, setOpen] = useState(true);

@@ -8,15 +8,13 @@ export const TOC_PAGE_SIZE = 100;
 /** Mục lục đầy đủ theo thứ tự đọc, phân trang để truyện 2000+ chương không khựng. */
 export async function TocList({
   slug,
-  novelId,
   page,
 }: {
   slug: string;
-  novelId: string;
   page: number;
 }) {
   const offset = (page - 1) * TOC_PAGE_SIZE;
-  const rows = await fetchChapterList(novelId, {
+  const rows = await fetchChapterList(slug, {
     limit: TOC_PAGE_SIZE + 1,
     offset,
     newestFirst: false,

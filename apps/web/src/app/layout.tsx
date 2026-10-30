@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Literata, Source_Serif_4 } from "next/font/google";
 
 import { ThemeProvider } from "@/components/theme-provider";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 import "./globals.css";
 
@@ -29,11 +28,12 @@ const literata = Literata({
   display: "swap",
 });
 
+const SITE_NAME = "Truyện";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
   title: { default: SITE_NAME, template: `%s · ${SITE_NAME}` },
-  description: SITE_DESCRIPTION,
-  openGraph: { type: "website", siteName: SITE_NAME, locale: "vi_VN" },
+  description: "Đọc truyện chữ online.",
+  robots: { index: false, follow: false },
 };
 
 /**

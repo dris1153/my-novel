@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { ReaderSettings } from "./reader-settings";
+import { useProgressSync } from "./use-progress-sync";
 
 import {
   READER_LINE_HEIGHT,
@@ -13,32 +14,32 @@ import {
   READER_WIDTH,
   useReaderPrefs,
 } from "@/lib/reader";
-import { createClient } from "@/lib/supabase/client";
-import { hasSupabaseConfig } from "@/lib/supabase/config";
 
 type Props = {
-  novelId: string;
   novelSlug: string;
   novelTitle: string;
-  chapterId: string;
   chapterNumber: number;
   chapterTitle: string;
   total: number;
-  hasPrev: boolean;
-  hasNext: boolean;
+  prevNumber: number | null;
+  nextNumber: number | null;
+  /** Vị trí cuộn đã lưu của CHƯƠNG NÀY (0 nếu tiến độ đang ở chương khác). */
+  initialScroll: number;
+  /** Tiến độ đã trỏ tới chương này rồi, khỏi ghi lại khi mở. */
+  alreadySaved: boolean;
   children: React.ReactNode;
 };
 
 export function ReaderShell({
-  novelId,
   novelSlug,
   novelTitle,
-  chapterId,
   chapterNumber,
   chapterTitle,
   total,
-  hasPrev,
-  hasNext,
+  prevNumber,
+  nextNumber,
+  initialScroll,
+  alreadySaved,
   children,
 }: Props) {
   const router = useRouter();
@@ -48,57 +49,18 @@ export function ReaderShell({
 
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  useProgressSync({ slug: novelSlug, chapter: chapterNumber, initialScroll, alreadySaved });
+
   const topbarRef = useRef<HTMLElement | null>(null);
   const fillRef = useRef<HTMLDivElement | null>(null);
-  const userIdRef = useRef<string | null>(null);
-  const lastSavedRef = useRef(0);
 
   const base = `/truyen/${novelSlug}`;
-  const prevHref = `${base}/chuong/${chapterNumber - 1}`;
-  const nextHref = `${base}/chuong/${chapterNumber + 1}`;
+  const hasPrev = prevNumber !== null;
+  const hasNext = nextNumber !== null;
+  const prevHref = `${base}/chuong/${prevNumber}`;
+  const nextHref = `${base}/chuong/${nextNumber}`;
 
-  // Biết có đăng nhập không, để khỏi ghi tiến độ cho khách.
-  useEffect(() => {
-    if (!hasSupabaseConfig) return;
-    let active = true;
-    createClient()
-      .auth.getUser()
-      .then(({ data }) => {
-        if (active) userIdRef.current = data.user?.id ?? null;
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  // Mở lại đúng chỗ đã dừng, nếu tiến độ đã lưu thuộc chính chương này.
-  useEffect(() => {
-    if (!hasSupabaseConfig) return;
-    let active = true;
-
-    createClient()
-      .from("reading_progress")
-      .select("percent, chapters(number)")
-      .eq("novel_id", novelId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!active) return;
-        const row = data as { percent: number; chapters: { number: number } | null } | null;
-        if (!row?.chapters || row.chapters.number !== chapterNumber) return;
-        const percent = Math.min(1, Math.max(0, row.percent));
-        if (percent <= 0.01) return;
-        requestAnimationFrame(() => {
-          const scrollable = document.documentElement.scrollHeight - window.innerHeight;
-          if (scrollable > 0) window.scrollTo({ top: scrollable * percent });
-        });
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [novelId, chapterNumber]);
-
-  // Cuộn: cập nhật thanh tiến độ + ẩn/hiện topbar + lưu tiến độ (throttle 5s).
+  // Cuộn: cập nhật thanh tiến độ + ẩn/hiện topbar (lưu tiến độ ở use-progress-sync).
   // Ghi thẳng vào DOM để không re-render mỗi frame.
   useEffect(() => {
     let lastY = window.scrollY;
@@ -116,32 +78,11 @@ export function ReaderShell({
         topbarRef.current.style.transform = hide ? "translateY(-100%)" : "translateY(0)";
       }
       lastY = y;
-
-      const now = Date.now();
-      if (
-        userIdRef.current &&
-        now - lastSavedRef.current > 5000 &&
-        percent > 0.01
-      ) {
-        lastSavedRef.current = now;
-        createClient()
-          .from("reading_progress")
-          .upsert(
-            {
-              user_id: userIdRef.current,
-              novel_id: novelId,
-              chapter_id: chapterId,
-              percent,
-            },
-            { onConflict: "user_id,novel_id" }
-          )
-          .then(() => {});
-      }
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [novelId, chapterId]);
+  }, []);
 
   // Điều hướng bằng bàn phím, theo lối đọc trên desktop.
   useEffect(() => {

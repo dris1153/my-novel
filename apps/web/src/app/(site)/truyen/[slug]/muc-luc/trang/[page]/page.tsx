@@ -20,7 +20,6 @@ export async function generateMetadata({ params }: PageProps<"/truyen/[slug]/muc
 
   return {
     title: `Mục lục — ${novel.title} (trang ${page})`,
-    alternates: { canonical: `/truyen/${novel.slug}/muc-luc/trang/${page}` },
   };
 }
 
@@ -48,7 +47,7 @@ export default async function TocPagedPage({
         Mục lục <span className="text-ink-3">— {novel.title}</span>
       </h1>
       <Suspense fallback={<ChapterListSkeleton rows={12} />}>
-        <TocList slug={novel.slug} novelId={novel.id} page={current} />
+        <TocList slug={novel.slug} page={current} />
       </Suspense>
     </main>
   );

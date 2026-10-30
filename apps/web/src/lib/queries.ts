@@ -1,293 +1,168 @@
-import type { Chapter, Novel } from "shared";
+import {
+  INDEX_PATH,
+  chapterPath,
+  chaptersIndexPath,
+  isSlug,
+  metaPath,
+  type ChapterEntry,
+  type IndexNovel,
+  type NovelIndex,
+  type NovelMeta,
+  type StoreGenre,
+} from "shared";
 
-import { hasSupabaseConfig } from "./supabase/config";
-import { createPublicClient } from "./supabase/public";
+import { readJson, readText } from "./github-store";
 
-/** Cột cho thẻ/lưới — không lấy `description` cho nhẹ. */
-const CARD = "id, slug, title, author, cover_url, status, view_count, updated_at, featured";
+export type Genre = StoreGenre;
 
-export type NovelCard = Pick<
-  Novel,
-  | "id"
-  | "slug"
-  | "title"
-  | "author"
-  | "cover_url"
-  | "status"
-  | "view_count"
-  | "updated_at"
-  | "featured"
-> & { chapters: { count: number }[] };
+export type NovelCard = IndexNovel & { coverUrl: string | null };
 
-export type NovelDetail = Novel & {
-  novel_genres: { genres: { slug: string; name: string } | null }[];
-  chapters: { count: number }[];
+export type NovelDetail = NovelMeta & {
+  coverUrl: string | null;
+  chapterCount: number;
+  genreList: Genre[];
 };
 
-export type FeaturedNovel = NovelCard & Pick<Novel, "description">;
-
-export type ChapterListItem = Pick<Chapter, "id" | "number" | "title" | "created_at">;
-
-export type Genre = { id: number; slug: string; name: string };
-
-const db = () => createPublicClient();
-
-function unwrap<T>({ data, error }: { data: T | null; error: { message: string } | null }): T {
-  if (error) throw new Error(error.message);
-  if (data === null) throw new Error("Không tìm thấy dữ liệu");
-  return data;
-}
-
-export function chapterCount(novel: NovelCard): number {
-  return novel.chapters?.[0]?.count ?? 0;
-}
-
-/** Truyện đang đề cử; chưa gắn cờ nào thì lấy truyện nhiều lượt đọc nhất. */
-export async function fetchFeatured(): Promise<FeaturedNovel | null> {
-  if (!hasSupabaseConfig) return null;
-  const client = db();
-
-  const { data: featured } = await client
-    .from("novels")
-    .select(`${CARD}, description, chapters(count)`)
-    .eq("published", true)
-    .eq("featured", true)
-    .order("updated_at", { ascending: false })
-    .limit(1)
-    .returns<FeaturedNovel[]>();
-
-  if (featured && featured.length > 0) return featured[0];
-
-  const { data: top } = await client
-    .from("novels")
-    .select(`${CARD}, description, chapters(count)`)
-    .eq("published", true)
-    .order("view_count", { ascending: false })
-    .limit(1)
-    .returns<FeaturedNovel[]>();
-
-  return top?.[0] ?? null;
-}
-
-export async function fetchPopular(limit = 12): Promise<NovelCard[]> {
-  if (!hasSupabaseConfig) return [];
-  return unwrap(
-    await db()
-      .from("novels")
-      .select(`${CARD}, chapters(count)`)
-      .eq("published", true)
-      .order("view_count", { ascending: false })
-      .limit(limit)
-      .returns<NovelCard[]>()
-  );
-}
-
-export async function fetchRecent(limit = 24, offset = 0): Promise<NovelCard[]> {
-  if (!hasSupabaseConfig) return [];
-  return unwrap(
-    await db()
-      .from("novels")
-      .select(`${CARD}, chapters(count)`)
-      .eq("published", true)
-      .order("updated_at", { ascending: false })
-      .range(offset, offset + limit - 1)
-      .returns<NovelCard[]>()
-  );
-}
-
-export async function fetchGenres(): Promise<Genre[]> {
-  if (!hasSupabaseConfig) return [];
-  return unwrap(
-    await db().from("genres").select("id, slug, name").order("name").returns<Genre[]>()
-  );
-}
-
-/** Cho sitemap: chỉ slug + lần cập nhật, không kéo cả bảng nặng. */
-export async function fetchAllNovelPaths(): Promise<{ slug: string; updated_at: string }[]> {
-  if (!hasSupabaseConfig) return [];
-  const { data } = await db()
-    .from("novels")
-    .select("slug, updated_at")
-    .eq("published", true)
-    .order("updated_at", { ascending: false })
-    .limit(5000)
-    .returns<{ slug: string; updated_at: string }[]>();
-  return data ?? [];
-}
-
-export async function fetchGenre(slug: string): Promise<Genre | null> {
-  if (!hasSupabaseConfig) return null;
-  const { data } = await db()
-    .from("genres")
-    .select("id, slug, name")
-    .eq("slug", slug)
-    .maybeSingle()
-    .returns<Genre>();
-  return data ?? null;
-}
-
-export async function fetchByGenre(slug: string, limit = 24, offset = 0): Promise<NovelCard[]> {
-  if (!hasSupabaseConfig) return [];
-  return unwrap(
-    await db()
-      .from("novels")
-      .select(`${CARD}, chapters(count), novel_genres!inner(genres!inner(slug))`)
-      .eq("published", true)
-      .eq("novel_genres.genres.slug", slug)
-      .order("updated_at", { ascending: false })
-      .range(offset, offset + limit - 1)
-      .returns<NovelCard[]>()
-  );
-}
-
-/** Bỏ ký tự phá cú pháp `.or()` của PostgREST. */
-function sanitizeTerm(term: string) {
-  return term.trim().replace(/[,()%\\]/g, " ").replace(/\s+/g, " ").trim();
-}
-
-export async function searchNovels(term: string, limit = 24, offset = 0): Promise<NovelCard[]> {
-  const q = sanitizeTerm(term);
-  if (!hasSupabaseConfig || !q) return [];
-  return unwrap(
-    await db()
-      .from("novels")
-      .select(`${CARD}, chapters(count)`)
-      .eq("published", true)
-      .or(`title.ilike.%${q}%,author.ilike.%${q}%`)
-      .order("updated_at", { ascending: false })
-      .range(offset, offset + limit - 1)
-      .returns<NovelCard[]>()
-  );
-}
-
-export async function fetchNovel(slug: string): Promise<NovelDetail | null> {
-  if (!hasSupabaseConfig) return null;
-  const { data } = await db()
-    .from("novels")
-    .select("*, chapters(count), novel_genres(genres(slug, name))")
-    .eq("slug", slug)
-    .maybeSingle()
-    .returns<NovelDetail>();
-  return data ?? null;
-}
-
-export type NovelSummary = {
-  id: string;
-  slug: string;
-  title: string;
-  cover_url: string | null;
-  chapters: { count: number }[];
-};
-
-/** Tra theo id — dùng để hiện tên + số chương của các job crawl đang chạy. */
-export async function fetchNovelSummaries(ids: string[]): Promise<NovelSummary[]> {
-  if (!hasSupabaseConfig || ids.length === 0) return [];
-  const { data } = await db()
-    .from("novels")
-    .select("id, slug, title, cover_url, chapters(count)")
-    .in("id", ids)
-    .returns<NovelSummary[]>();
-  return data ?? [];
-}
-
-export async function fetchChapterList(
-  novelId: string,
-  { limit = 50, offset = 0, newestFirst = true }: { limit?: number; offset?: number; newestFirst?: boolean } = {}
-): Promise<ChapterListItem[]> {
-  if (!hasSupabaseConfig) return [];
-  return unwrap(
-    await db()
-      .from("chapters")
-      .select("id, number, title, created_at")
-      .eq("novel_id", novelId)
-      .eq("published", true)
-      .order("number", { ascending: !newestFirst })
-      .range(offset, offset + limit - 1)
-      .returns<ChapterListItem[]>()
-  );
-}
-
-export async function fetchChapterCount(novelId: string): Promise<number> {
-  if (!hasSupabaseConfig) return 0;
-  const { count } = await db()
-    .from("chapters")
-    .select("id", { count: "exact", head: true })
-    .eq("novel_id", novelId)
-    .eq("published", true);
-  return count ?? 0;
-}
-
-/** Chương nhỏ nhất — đích của nút "Đọc từ đầu". */
-export async function fetchFirstChapterNumber(novelId: string): Promise<number | null> {
-  if (!hasSupabaseConfig) return null;
-  const { data } = await db()
-    .from("chapters")
-    .select("number")
-    .eq("novel_id", novelId)
-    .eq("published", true)
-    .order("number", { ascending: true })
-    .limit(1)
-    .maybeSingle()
-    .returns<{ number: number }>();
-  return data?.number ?? null;
-}
+export type ChapterListItem = { number: number; title: string };
 
 export type ChapterView = {
-  novel: Pick<Novel, "id" | "slug" | "title">;
-  chapter: Pick<Chapter, "id" | "number" | "title" | "content" | "word_count">;
-  hasPrev: boolean;
-  hasNext: boolean;
+  novel: { slug: string; title: string };
+  chapter: { number: number; title: string; content: string };
+  /** Chương liền trước/sau trong mục lục; `chapters.json` có thể có lỗ hổng nên không dùng ±1. */
+  prevNumber: number | null;
+  nextNumber: number | null;
   total: number;
 };
 
-/** Một chương đã đăng + hàng xóm + tổng số chương (để hiện "chương N / M"). */
-export async function fetchChapter(
-  novelSlug: string,
-  number: number
-): Promise<ChapterView | null> {
-  if (!hasSupabaseConfig) return null;
-  const client = db();
+// 404 ở đây là sai repo/token (GitHub trả 404 thay vì 401 cho repo private) — phải ném,
+// nếu không trang "thư viện trống" sẽ bị cache như thể hợp lệ.
+async function getIndex(): Promise<NovelIndex> {
+  const index = await readJson<NovelIndex>(INDEX_PATH);
+  if (!index) throw new Error(`Không đọc được ${INDEX_PATH} — kiểm tra GITHUB_DATA_REPO/GITHUB_DATA_TOKEN`);
+  return index;
+}
 
-  const { data: novel } = await client
-    .from("novels")
-    .select("id, slug, title")
-    .eq("slug", novelSlug)
-    .eq("published", true)
-    .maybeSingle()
-    .returns<Pick<Novel, "id" | "slug" | "title">>();
-  if (!novel) return null;
+async function getChapters(slug: string): Promise<ChapterEntry[]> {
+  return (await readJson<ChapterEntry[]>(chaptersIndexPath(slug))) ?? [];
+}
 
-  const { data: chapter } = await client
-    .from("chapters")
-    .select("id, number, title, content, word_count")
-    .eq("novel_id", novel.id)
-    .eq("number", number)
-    .eq("published", true)
-    .maybeSingle()
-    .returns<Pick<Chapter, "id" | "number" | "title" | "content" | "word_count">>();
-  if (!chapter) return null;
+/** Bìa nằm trong repo private nên đi qua route proxy `/api/cover/[slug]`. */
+function coverUrlFor(slug: string, cover: string | null): string | null {
+  return cover ? `/api/cover/${slug}` : null;
+}
 
-  const [{ data: neighbours }, { count }] = await Promise.all([
-    client
-      .from("chapters")
-      .select("number")
-      .eq("novel_id", novel.id)
-      .eq("published", true)
-      .in("number", [number - 1, number + 1]),
-    client
-      .from("chapters")
-      .select("id", { count: "exact", head: true })
-      .eq("novel_id", novel.id)
-      .eq("published", true),
-  ]);
+function toCard(novel: IndexNovel): NovelCard {
+  return { ...novel, coverUrl: coverUrlFor(novel.slug, novel.cover) };
+}
 
-  const numbers = new Set((neighbours ?? []).map((row) => row.number));
+/** Bỏ dấu + hạ chữ thường để "dai phung" khớp "Đại Phụng". */
+function fold(text: string): string {
+  return text
+    .replace(/[đĐ]/g, "d")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** `index.json` đã sắp theo cập nhật mới nhất. */
+export async function fetchRecent(limit = 24, offset = 0): Promise<NovelCard[]> {
+  const { novels } = await getIndex();
+  return novels.slice(offset, offset + limit).map(toCard);
+}
+
+export async function fetchGenres(): Promise<Genre[]> {
+  const { genres } = await getIndex();
+  return [...genres].sort((a, b) => a.name.localeCompare(b.name, "vi"));
+}
+
+export async function fetchGenre(slug: string): Promise<Genre | null> {
+  const { genres } = await getIndex();
+  return genres.find((g) => g.slug === slug) ?? null;
+}
+
+export async function fetchByGenre(slug: string, limit = 24, offset = 0): Promise<NovelCard[]> {
+  const { novels } = await getIndex();
+  return novels
+    .filter((n) => n.genres.includes(slug))
+    .slice(offset, offset + limit)
+    .map(toCard);
+}
+
+export async function searchNovels(term: string, limit = 24, offset = 0): Promise<NovelCard[]> {
+  const q = fold(term);
+  if (!q) return [];
+  const { novels } = await getIndex();
+  return novels
+    .filter((n) => fold(n.title).includes(q) || fold(n.author).includes(q))
+    .slice(offset, offset + limit)
+    .map(toCard);
+}
+
+export async function fetchNovel(slug: string): Promise<NovelDetail | null> {
+  if (!isSlug(slug)) return null;
+  const [meta, index] = await Promise.all([readJson<NovelMeta>(metaPath(slug)), getIndex()]);
+  if (!meta) return null;
 
   return {
-    novel,
-    chapter,
-    hasPrev: numbers.has(number - 1),
-    hasNext: numbers.has(number + 1),
-    total: count ?? 0,
+    ...meta,
+    coverUrl: coverUrlFor(meta.slug, meta.cover),
+    chapterCount: index.novels.find((n) => n.slug === slug)?.chapterCount ?? 0,
+    genreList: index.genres.filter((g) => meta.genres.includes(g.slug)),
   };
+}
+
+/** Mới nhất trước (mặc định) hoặc thứ tự đọc. */
+export async function fetchChapterList(
+  slug: string,
+  { limit = 50, offset = 0, newestFirst = true }: { limit?: number; offset?: number; newestFirst?: boolean } = {}
+): Promise<ChapterListItem[]> {
+  if (!isSlug(slug)) return [];
+  const entries = await getChapters(slug);
+  const ordered = newestFirst ? [...entries].reverse() : entries;
+  return ordered.slice(offset, offset + limit).map((e) => ({ number: e.n, title: e.title }));
+}
+
+/** Chương nhỏ nhất — đích của nút "Đọc từ đầu". */
+export async function fetchFirstChapterNumber(slug: string): Promise<number | null> {
+  if (!isSlug(slug)) return null;
+  return (await getChapters(slug))[0]?.n ?? null;
+}
+
+/** Một chương + hàng xóm + tổng số chương (để hiện "chương N / M"). */
+export async function fetchChapter(slug: string, number: number): Promise<ChapterView | null> {
+  if (!isSlug(slug) || !Number.isInteger(number) || number < 1) return null;
+
+  const [index, entries] = await Promise.all([getIndex(), getChapters(slug)]);
+  const novel = index.novels.find((n) => n.slug === slug);
+  const entry = entries.find((e) => e.n === number);
+  if (!novel || !entry) return null;
+
+  const content = await readText(chapterPath(slug, number));
+  if (content === null) return null;
+
+  const at = entries.indexOf(entry);
+  return {
+    novel: { slug, title: novel.title },
+    chapter: { number, title: entry.title, content },
+    prevNumber: entries[at - 1]?.n ?? null,
+    nextNumber: entries[at + 1]?.n ?? null,
+    total: entries[entries.length - 1].n,
+  };
+}
+
+/** Thẻ truyện theo danh sách slug, giữ đúng thứ tự đầu vào (slug không còn trong index thì bỏ). */
+export async function fetchNovelCards(slugs: string[]): Promise<NovelCard[]> {
+  const { novels } = await getIndex();
+  const bySlug = new Map(novels.map((n) => [n.slug, n]));
+  return slugs.flatMap((slug) => {
+    const novel = bySlug.get(slug);
+    return novel ? [toCard(novel)] : [];
+  });
+}
+
+export async function fetchChapterTitle(slug: string, number: number): Promise<string | null> {
+  if (!isSlug(slug)) return null;
+  return (await getChapters(slug)).find((e) => e.n === number)?.title ?? null;
 }

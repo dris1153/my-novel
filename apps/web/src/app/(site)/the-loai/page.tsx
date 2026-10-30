@@ -1,18 +1,18 @@
 import Link from "next/link";
+import { connection } from "next/server";
 
 import { DoodleCompass } from "@/components/doodles";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { fetchGenres } from "@/lib/queries";
 
-export const revalidate = 3600;
-
 export const metadata = {
   title: "Thể loại",
   description: "Duyệt truyện theo thể loại: tiên hiệp, kiếm hiệp, ngôn tình, trinh thám và hơn thế.",
-  alternates: { canonical: "/the-loai" },
 };
 
 export default async function GenresPage() {
+  // Không prerender lúc build (cần GitHub token); vẫn dùng data cache.
+  await connection();
   const genres = await fetchGenres();
 
   return (

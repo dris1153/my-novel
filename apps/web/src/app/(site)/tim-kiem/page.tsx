@@ -54,7 +54,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/tim-kiem"
           </p>
           <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
             {results.map((novel) => (
-              <NovelGridCard key={novel.id} novel={novel} />
+              <NovelGridCard key={novel.slug} novel={novel} />
             ))}
           </div>
           <PageNav page={page} hasMore={hasMore} hrefFor={hrefFor} />
