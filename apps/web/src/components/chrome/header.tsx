@@ -1,48 +1,43 @@
 import Link from "next/link";
 
-import { HeaderAuthSlot } from "./auth-slot";
+import { AuthSlot } from "./auth-slot";
 import { NavLink } from "./nav-link";
-import { ThemeToggle } from "./theme-toggle";
+import { NAV, SearchIcon } from "./nav-items";
 
-const NAV = [
-  { href: "/", label: "Trang chủ" },
-  { href: "/the-loai", label: "Thể loại" },
-  { href: "/tim-kiem", label: "Tìm kiếm" },
-  { href: "/tu-truyen", label: "Tủ truyện" },
-];
+import { getAuthorizedUser } from "@/lib/auth";
 
-/** Header Bar Opennote: transparent, 1px hairline dưới, không shadow, không sticky. */
-export function Header() {
+/** Header gọn: wordmark + tìm kiếm. Màn rộng thêm nav ngang (thay tab bar) và tên người dùng. */
+export async function Header() {
+  const user = await getAuthorizedUser();
+
   return (
-    <header className="border-b border-line">
-      <div className="mx-auto w-full max-w-[1200px] px-6">
-        <div className="flex h-[68px] items-center gap-6">
-          <Link href="/" className="font-serif text-[22px] leading-none text-ink">
-            Truyện
-          </Link>
+    <header className="sticky top-0 z-30 border-b border-line bg-canvas/95">
+      <div className="mx-auto flex h-14 w-full max-w-[1200px] items-center gap-4 px-4 lg:px-6">
+        <Link href="/" className="font-serif text-xl leading-none font-bold text-fg">
+          Truyện
+        </Link>
 
-          <nav className="hidden flex-1 items-center justify-center gap-6 md:flex">
-            {NAV.map((item) => (
-              <NavLink key={item.href} href={item.href}>
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
+        {user && (
+          <>
+            <nav aria-label="Điều hướng chính" className="hidden flex-1 items-center gap-1 lg:flex">
+              {NAV.map(({ href, label }) => (
+                <NavLink key={href} href={href}>
+                  {label}
+                </NavLink>
+              ))}
+            </nav>
 
-          <div className="ml-auto flex items-center gap-3 md:ml-0">
-            <ThemeToggle />
-            <HeaderAuthSlot />
-          </div>
-        </div>
-
-        {/* Mobile: nav xuống hàng dưới, cuộn ngang nếu chật. */}
-        <nav className="-mx-6 flex items-center gap-6 overflow-x-auto px-6 pb-3 md:hidden">
-          {NAV.map((item) => (
-            <NavLink key={item.href} href={item.href}>
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
+            <div className="ml-auto flex items-center gap-2">
+              <Link
+                href="/tim-kiem"
+                aria-label="Tìm kiếm"
+                className="grid size-11 place-items-center rounded-full text-fg hover:bg-hover">
+                <SearchIcon />
+              </Link>
+              <AuthSlot name={user.name ?? user.email?.split("@")[0] ?? "Tôi"} />
+            </div>
+          </>
+        )}
       </div>
     </header>
   );
