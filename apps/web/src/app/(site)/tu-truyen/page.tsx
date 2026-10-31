@@ -50,6 +50,7 @@ export default async function LibraryPage({ searchParams }: PageProps<"/tu-truye
 
       {rows.length === 0 ? (
         <EmptyState
+          className="mt-4"
           art="empty-library"
           title={tab === "dang-doc" ? "Chưa đọc truyện nào" : "Tủ truyện còn trống"}
           description={

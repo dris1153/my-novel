@@ -178,7 +178,7 @@ export async function fetchGenreTiles(): Promise<GenreTile[]> {
     .sort((a, b) => a.name.localeCompare(b.name, "vi"))
     .map((genre) => {
       const list = novels.filter((n) => n.genres.includes(genre.slug));
-      return { ...genre, count: list.length, covers: list.slice(0, 3).map(toCard) };
+      return { ...genre, count: list.length, covers: list.slice(0, 2).map(toCard) };
     });
 }
 

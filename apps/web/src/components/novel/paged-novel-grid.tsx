@@ -25,7 +25,7 @@ export async function PagedNovelGrid({
   if (novels.length === 0) return empty;
 
   return (
-    <div className="mt-4 rounded-card bg-surface p-3 lg:p-5">
+    <div>
       <NovelGrid novels={novels} priorityCount={page === 1 ? 6 : 0} />
       <PageNav page={page} hasMore={hasMore} hrefFor={(target) => pagedHref(basePath, target)} />
     </div>

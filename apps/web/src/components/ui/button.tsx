@@ -12,7 +12,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
   /** Màu nhấn duy nhất của app — chỉ cho hành động chính của màn hình. */
   primary: "bg-accent text-on-accent hover:bg-accent-hover",
   /** Nút xám đi kèm nút chính ("DS.Chương", "‹ Trước"). */
-  secondary: "bg-hover text-fg hover:bg-line",
+  secondary: "bg-tint-lavender text-fg hover:bg-hover",
   ghost: "border border-line-strong bg-surface text-fg hover:bg-hover",
 };
 
