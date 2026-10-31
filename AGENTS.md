@@ -12,7 +12,7 @@ fast path for agents.
   file format + path builders). Consumed as **TypeScript source** (`main: ./src/index.ts`); web needs
   `transpilePackages: ["shared"]`.
 - `packages/crawler` — local CLI: truyenfull → files in a clone of `novel-data` → `git push main`.
-- `DESIGN.md` is the current visual system ("Ngọc Lục": TruyenYY-style layout, green accent, light-first); `plans/` and `docs/wireframe/` are design history, not current spec.
+- `DESIGN.md` is the current visual system ("Mây Tím": pastel cards, indigo accent, light-first; shell + home done, other pages being revamped one round at a time); `plans/` and `docs/wireframe/` are design history, not current spec.
 
 ## Commands
 
@@ -61,7 +61,7 @@ because those types are generated. Run `pnpm --filter web exec next typegen` fir
   must be the git root of the clone and on `main`.
 - Covers are served by `/api/cover/[slug]` (repo is private) and rendered with `unoptimized`.
 - The gate exempts exactly `_next/static/`, `favicon.ico` and the `art/` prefix (`public/art/` colour art; the sign-in page needs it). Nothing else in `public/` is reachable without login — don't put private files there. `/_next/image` is gated too, so art/images that may render before login use `next/image` with `unoptimized`.
-- Colours: use the token utilities (`bg-canvas`, `bg-surface`, `text-fg`, `text-fg-2`, `text-accent-fg`, `bg-accent`, `text-hot-fg`, `bg-bar`…), never raw hex in app chrome. `contrast.test.ts` parses `globals.css`; `reader-themes.test.ts` checks the reader palette. Green as *text* must use `accent-fg` (`accent` fails on the grey page); fills inside a white block use `subtle`/`hover`, not `surface`.
+- Colours: use the token utilities (`bg-canvas`, `bg-surface`, `text-fg`, `text-fg-2`, `text-accent-fg`, `bg-accent`, `bg-ink`, `bg-tint-lavender`…), never raw hex in app chrome. `contrast.test.ts` parses `globals.css`; `reader-themes.test.ts` checks the reader palette. Indigo as *text* uses `accent-fg`; fills inside a white card use `subtle`/`hover`, not `surface`. Mascots are cut from a chroma-green background with `apps/web/scripts/art-cut-background.mjs` (Meshy's `remove_background` eats white fur).
 - Chapter titles from the source repeat "<novel> - Chương N:"; `lib/chapter-title.ts` strips that at read time — UI prints "Chương N" itself.
 - `.npmrc` keeps `node-linker=hoisted`; it is no longer required but changing it reinstalls everything.
 - `next dev` generates `apps/web/AGENTS.md` / `CLAUDE.md` (Next 16 breaking-changes notice); keep them in commits.

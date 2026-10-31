@@ -67,11 +67,11 @@ Tuỳ chỉnh đọc lưu trên trình duyệt (`localStorage`), không đồng 
 
 ## 4. Các trang
 
-Trên điện thoại, 4 tab ở đáy màn hình: **Trang chủ · Thể loại · Tủ truyện · Tôi**; tìm kiếm là kính lúp ở góc trên. Màn rộng có ô tìm kiếm trên header và thanh menu xám bên dưới.
+Trên điện thoại, 4 tab ở đáy màn hình: **Trang chủ · Thể loại · Tủ truyện · Tôi**; tìm kiếm là kính lúp ở góc trên. Màn rộng có sidebar bên trái và ô tìm kiếm trên cùng; công tắc Sáng/Tối nằm ở sidebar.
 
 | Đường dẫn | Nội dung |
 |---|---|
-| `/` | Banner truyện nổi bật (truyện bật `featured` trong `meta.json`, chưa có thì lấy truyện mới) + ô tìm + "Đang đọc" + 6 lối tắt + kệ "Mới cập nhật" + kệ "Truyện hoàn thành" |
+| `/` | Banner giới thiệu + **Đang đọc** + **Tủ truyện của bạn** + **Mới cập nhật** + **Tiếp tục đọc** (truyện đọc dở khác) + **Gợi ý cho bạn** (cùng thể loại với truyện bạn đọc/theo dõi) |
 | `/danh-sach/moi-cap-nhat`, `/danh-sach/hoan-thanh` | Toàn bộ truyện mới cập nhật / đã hoàn thành, phân trang |
 | `/truyen/<slug>` | Thông tin truyện, nút **Đọc tiếp chương N** · **DS.Chương** · **Theo dõi**, giới thiệu, chương mới nhất, truyện cùng thể loại |
 | `/tu-truyen` | Hai tab: **Đang đọc** (tiến độ từng truyện) và **Theo dõi** (truyện đã bấm ♡). Badge **+N** = số chương mới ra từ lần bạn đọc/theo dõi gần nhất; đọc một chương là badge tắt |
