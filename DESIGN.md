@@ -2,9 +2,9 @@
 
 > A soft pastel reading room: lavender, peach and sky cards on a warm white page, one indigo accent, a calico cat keeping you company.
 
-**Theme:** light-first (default), dark "tím đêm" as an option. **Platform:** mobile-first web (390px is the design width); desktop ≥1024px adds a left sidebar. Reference mockup: `plans/20261031-ui-may-tim/reference-mockup.png`.
+**Theme:** light-first (default), dark "tím đêm" as an option. **Platform:** mobile-first web (390px is the design width); desktop ≥1024px adds a left sidebar. Reference mockups: `plans/20261031-ui-may-tim/reference-mockup.png` (home), `mockup-the-loai.png`, `mockup-the-loai-chi-tiet.png`.
 
-**Status:** the app shell and the home page follow this system. Thể loại, danh sách, tìm kiếm, trang truyện, mục lục, tủ truyện, Tôi, đăng nhập, trang trống/lỗi and the reader only inherit the new colours and font so far; they keep their "Ngọc Lục" layout (TruyenYY style, see git history) until their own revamp round.
+**Status:** the app shell, the home page and the genre pages (`/the-loai`, `/the-loai/[slug]`) follow this system. Danh sách and tìm kiếm share the new cover-card grid and genre chips but keep their old headers. Trang truyện, mục lục, tủ truyện, Tôi, đăng nhập, trang trống/lỗi and the reader only inherit the new colours and font so far; they keep their "Ngọc Lục" layout (TruyenYY style, see git history) until their own revamp round.
 
 Source of truth for values is `apps/web/src/app/globals.css` (app) and `apps/web/src/lib/reader-themes.ts` (reader). Contrast is enforced by `src/lib/contrast.test.ts` and `src/lib/reader-themes.test.ts` — change a colour, run `pnpm test`.
 
@@ -70,6 +70,12 @@ Both via `next/font/google` with `subsets: ["latin", "vietnamese"]`. Home block 
 
 Reading progress beyond the novel's chapter count (novel re-crawled shorter) is not offered, because the link would 404.
 
+## Thể loại
+
+- **`/the-loai`:** lavender header card (title, subtitle, cat reading) + grid of genre cards (2 / 3 / 4 / 5 columns). Each card: the genre's own illustration, name + novel count on a bottom `surface` scrim, two real covers fanned in the corner (≥640px). Genres with novels first.
+- **`/the-loai/[slug]`:** header card with the genre illustration on the right behind a left-to-right `canvas` scrim, breadcrumb pill "Thể loại ›", name, count, one-line tagline (`lib/genre-info.ts`; a genre without art/tagline falls back to the plain sky tint), cat mascot (≥1024px). Then genre chips (lavender pills, active = accent) and the cover-card grid with centred pagination.
+- **Cover-card grid** (`NovelGrid`, also used by danh sách and tìm kiếm): each novel is a white card (cover, bold title, author), 2 / 3 / 4 / 5 / 6 columns.
+
 ## Components (where they live)
 
 | Component | File | Notes |
@@ -77,6 +83,8 @@ Reading progress beyond the novel's chapter count (novel re-crawled shorter) is 
 | Sidebar / Header / TabBar / ThemeToggle / UserAvatar | `components/chrome/*` | shell |
 | SearchForm | `components/chrome/search-form.tsx` | GET `/tim-kiem?q=`; `withButton` on the search page |
 | HeroCarousel, ReadingCard, LibraryCard, CoverTile, PromoCard, ContinueList, HomeHeading | `components/home/*` | home only |
+| GenreCard, GenreHeader, GenreListing | `components/genre/*` | genre pages; art + taglines from `lib/genre-info.ts` |
+| NovelGrid / NovelGridCard, GenreChips, PageNav | `components/novel/*`, `components/ui/page-nav.tsx` | shared by genre, danh sách, tìm kiếm |
 | Button, Tag, SectionHeading, EmptyState, Illustration | `components/ui/*` | older pages; restyle in their round |
 
 ## Art
@@ -85,6 +93,7 @@ Soft pastel anime illustrations generated with Meshy `gpt-image-2-5-sunburst`, r
 
 - `public/art/hero-1..3.webp` (16:9, left side kept pale for the title),
 - `public/art/{mascot-cat,cat-reading,boy-cat,logo-book}.webp` (transparent),
+- `public/art/genres/<slug>.webp` (1200×800, page header) and `<slug>-sm.webp` (600×400, card) for the 10 genres,
 - older donghua art still used by pages not yet revamped: `sign-in`, `empty-library`, `no-results`, `no-chapters`, `not-found`, `error`.
 
 Rendered with `next/image` + `unoptimized`: `/_next/image` sits behind the login gate, `/art/` does not. Mascots are generated on flat chroma green and cut with `apps/web/scripts/art-cut-background.mjs`, because Meshy's `remove_background` eats white fur. Prompts, task ids and commands: `plans/20261031-ui-may-tim/art-prompts.md`.
