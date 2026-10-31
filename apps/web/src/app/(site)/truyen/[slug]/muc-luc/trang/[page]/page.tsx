@@ -28,7 +28,7 @@ export default async function TocPagedPage({ params }: PageProps<"/truyen/[slug]
   if (!novel) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-[1000px] px-4 pt-4 lg:px-6 lg:pt-6">
+    <main className="mx-auto flex w-full max-w-[1860px] flex-col gap-5 px-4 lg:gap-6 lg:px-6">
       <TocHeader novel={novel} page={current} />
       <Suspense fallback={<ChapterListSkeleton rows={12} />}>
         <TocList slug={novel.slug} page={current} />

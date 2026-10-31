@@ -2,9 +2,9 @@
 
 > A soft pastel reading room: lavender, peach and sky cards on a warm white page, one indigo accent, a calico cat keeping you company.
 
-**Theme:** light-first (default), dark "tím đêm" as an option. **Platform:** mobile-first web (390px is the design width); desktop ≥1024px adds a left sidebar. Reference mockups: `plans/20261031-ui-may-tim/reference-mockup.png` (home), `mockup-the-loai.png`, `mockup-the-loai-chi-tiet.png`.
+**Theme:** light-first (default), dark "tím đêm" as an option. **Platform:** mobile-first web (390px is the design width); desktop ≥1024px adds a left sidebar. Reference mockups: `plans/20261031-ui-may-tim/reference-mockup.png` (home), `mockup-the-loai.png`, `mockup-the-loai-chi-tiet.png`, `mockup-truyen.png`.
 
-**Status:** the app shell, the home page and the genre pages (`/the-loai`, `/the-loai/[slug]`) follow this system. Danh sách and tìm kiếm share the new cover-card grid and genre chips but keep their old headers. Trang truyện, mục lục, tủ truyện, Tôi, đăng nhập, trang trống/lỗi and the reader only inherit the new colours and font so far; they keep their "Ngọc Lục" layout (TruyenYY style, see git history) until their own revamp round.
+**Status:** the app shell, the home page, the genre pages (`/the-loai`, `/the-loai/[slug]`) and the novel page with its mục lục (`/truyen/[slug]`, `/truyen/[slug]/muc-luc`) follow this system. Danh sách and tìm kiếm share the new cover-card grid and genre chips but keep their old headers. Tủ truyện, Tôi, đăng nhập, trang trống/lỗi and the reader only inherit the new colours and font so far; they keep their "Ngọc Lục" layout (TruyenYY style, see git history) until their own revamp round.
 
 Source of truth for values is `apps/web/src/app/globals.css` (app) and `apps/web/src/lib/reader-themes.ts` (reader). Contrast is enforced by `src/lib/contrast.test.ts` and `src/lib/reader-themes.test.ts` — change a colour, run `pnpm test`.
 
@@ -31,7 +31,7 @@ Source of truth for values is `apps/web/src/app/globals.css` (app) and `apps/web
 | `ink` / `on-ink` | `#292942` / `#ffffff` | `#f1eff8` / `#16151f` | strong pill on art or tint |
 | `tint-lavender` / `tint-peach` / `tint-sky` | `#e2dffe` / `#feedd7` / `#d8e4fe` | `#2a2850` / `#3a2e22` / `#22304a` | pastel cards |
 | `tile` / `on-tile` / `on-tile-2` | `#e2dffe` / `#292942` / `#54526a` | same (no dark override) | genre cards stay pastel in both themes; each card sets `--tile` to its genre tint from `lib/genre-info.ts` |
-| `hot-fg` | `#b4235a` | `#ff9db0` | chapter counts on pages not yet revamped |
+| `hot-fg` | `#b4235a` | `#ff9db0` | sign-in error message |
 | `bar` / `on-bar` | `#292942` / `#ffffff` | `#2c2b3c` / `#f1eff8` | reader top bar |
 
 Colours deliberately differ from the mockup where it fails contrast: its meta grey `#a9a7b8` (2.2:1) is `fg-2`, and its pale progress bar (1.4:1) is `accent` on `surface`. Areas where `outline` gets clipped set `--focus-offset` negative; dark fills set `--focus-ring`.
@@ -77,6 +77,13 @@ Reading progress beyond the novel's chapter count (novel re-crawled shorter) is 
 - **`/the-loai/[slug]`:** header card with the genre illustration on the right behind a left-to-right `canvas` scrim, breadcrumb pill "Thể loại ›", name, count, one-line tagline (`lib/genre-info.ts`; a genre without art/tagline falls back to the plain sky tint), cat mascot (≥1024px). Then genre chips (lavender pills, active = accent) and the cover-card grid with centred pagination.
 - **Cover-card grid** (`NovelGrid`, also used by danh sách and tìm kiếm): each novel is a white card (cover, bold title, author), 2 / 3 / 4 / 5 / 6 columns.
 
+## Trang truyện & mục lục
+
+- **Hero card** (`NovelHero`): the illustration of the novel's main genre as backdrop under a `tint-lavender` scrim (90% below 1280px, where the text spans the full width; left-to-right fade from 1280px, where the text column stops at 74%), a tilted cover, title, author, genre pills in each genre's `tile` tint, stat chips (chapters, status, updated), then `NovelActions`: "Đã đọc N / M" (M = last chapter number, as in the reader) + progress bar and "Đọc tiếp chương N" only when chapter N is in `chapters.json` (otherwise "Đọc từ đầu", never a 404), a `tonal` "Mục lục" pill and the follow button. The sleeping cat sits bottom-right from 1280px.
+- **Below:** from 1280px two columns. Left: "Giới thiệu" and "Chương mới nhất" (5 rows) in white cards. Right: "Truyện cùng thể loại" (peach, up to 5 rows; hidden when there is none) and the sky PromoCard. Below 1280px everything stacks.
+- **Chapter rows** (shared with mục lục): a lavender number badge + the chapter's own title; the chapter being read gets an indigo badge, a soft-indigo row and "Đang đọc"; earlier ones dim to `fg-3`. No per-chapter dates: the data repo does not store them.
+- **Mục lục:** lavender header (small cover, "‹ <tên truyện>" pill, "Mục lục", chapter count, reading cat from 640px), then 100 rows per page in a white card, 2 columns from 1024px, centred pagination.
+
 ## Components (where they live)
 
 | Component | File | Notes |
@@ -85,8 +92,9 @@ Reading progress beyond the novel's chapter count (novel re-crawled shorter) is 
 | SearchForm | `components/chrome/search-form.tsx` | GET `/tim-kiem?q=`; `withButton` on the search page |
 | HeroCarousel, ReadingCard, LibraryCard, CoverTile, PromoCard, ContinueList, HomeHeading | `components/home/*` | home only |
 | GenreCard, GenreHeader, GenreListing | `components/genre/*` | genre pages; art + taglines from `lib/genre-info.ts` |
-| NovelGrid / NovelGridCard, GenreChips, PageNav | `components/novel/*`, `components/ui/page-nav.tsx` | shared by genre, danh sách, tìm kiếm |
-| Button, Tag, SectionHeading, EmptyState, Illustration | `components/ui/*` | older pages; restyle in their round |
+| NovelGrid, GenreChips, PageNav | `components/novel/*`, `components/ui/page-nav.tsx` | shared by genre, danh sách, tìm kiếm |
+| NovelHero, NovelActions, ChapterList / ChapterToc, RelatedList, TocHeader | `components/novel/*` | novel page and mục lục |
+| Button, EmptyState, Illustration | `components/ui/*` | older pages; restyle in their round |
 
 ## Art
 
@@ -94,7 +102,7 @@ Soft pastel anime illustrations generated with Meshy `gpt-image-2-5-sunburst`, r
 
 - `public/art/hero-1..3.webp` (16:9, left side kept pale for the title),
 - `public/art/{mascot-cat,cat-reading,boy-cat,logo-book}.webp` (transparent),
-- `public/art/cat-books.webp` (transparent, `/the-loai` header; OpenAI `gpt-image-2.5-sunburst` because Meshy credit ran out),
+- `public/art/cat-books.webp` (`/the-loai` header) and `cat-sleeping.webp` (novel hero), transparent; OpenAI `gpt-image-2.5-sunburst` because Meshy credit ran out,
 - `public/art/genres/<slug>.webp` (1200×800, page header) and `<slug>-sm.webp` (600×400, card) for the 10 genres,
 - older donghua art still used by pages not yet revamped: `sign-in`, `empty-library`, `no-results`, `no-chapters`, `not-found`, `error`.
 

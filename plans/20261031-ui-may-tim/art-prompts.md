@@ -57,6 +57,12 @@ Mascot, kết thúc chung: *"Single isolated character, centered, nothing touchi
 | gia-dinh | 01a19141-489a-741c-9dde-37de03d87b7a | mint-green | family house with garden and blossom trees |
 | lich-su | 01a19141-4aee-757b-b610-2ad93d3ab543 | coral-red | red palace pagoda, maple leaves |
 
+## Vòng 4: trang truyện (2026-10-31)
+
+- `mockup-truyen.png`: cùng endpoint/model/cỡ như vòng 3, tham chiếu `reference-mockup.png` + `mockup-the-loai.png`; prompt mô tả bố cục trang truyện (khối đầu lavender có bìa, tên, tác giả, nhãn thể loại, số liệu, thanh tiến độ, 3 nút; cột trái Giới thiệu + Chương mới nhất; cột phải Truyện cùng thể loại + thẻ cậu bé đọc sách).
+- `cat-sleeping.webp`: tham chiếu là vùng mèo ngủ cắt từ `mockup-truyen.png` (x 1150, y 200, 350×210) + `mascot-cat.webp` trên nền `#00D060`; 2 lần sinh (lần 1 có tai thừa trên lưng, lần 2 dùng). Cắt nền rồi `… cat-sleeping.webp 520 "" 82` (520×356, 26 KB).
+- Prompt mèo ngủ: *"Recreate the sleeping cat from the first reference image as one isolated sticker, in the exact style of the cat in the second reference image (…same calico cat character…). The cat is curled up asleep on top of a small fluffy white cloud with lavender shading, eyes closed, rosy cheeks, a tiny smile, tail wrapped around its body; correct anatomy with exactly two ears, both on top of the head and nothing ear-shaped on the body; two small lavender "Z" letters floating above its head and one small yellow four-point sparkle star beside it. … The entire background is one perfectly flat solid chroma-key green color #00D060 …"*
+
 ## Vòng 3: đầu trang `/the-loai` (2026-10-31)
 
 - Meshy hết credit → gọi thẳng OpenAI `POST /v1/images/edits`, model `gpt-image-2.5-sunburst`, `size 1536x1024`, `quality high`, 1 lần sinh (key `OPENAI_API_KEY` ở máy dev, không nằm trong repo).
