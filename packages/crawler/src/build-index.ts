@@ -15,6 +15,7 @@ export function makeIndex(
       status: m.status,
       genres: m.genres,
       cover: m.cover,
+      coverColor: m.coverColor ?? null,
       featured: m.featured,
       updatedAt: m.updatedAt,
       chapterCount,

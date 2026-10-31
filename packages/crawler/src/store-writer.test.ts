@@ -71,3 +71,15 @@ test('ChapterStore resume: chương đã flush thì has() = true, sắp theo n',
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('coverColor: lấy màu bìa mới, giữ màu cũ khi crawl lại không có bìa', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'novel-'));
+  try {
+    upsertNovelMeta(dir, { ...input, hasNewCover: true, coverColor: '#3b5f86' });
+    const again = upsertNovelMeta(dir, { ...input, hasNewCover: false });
+    assert.equal(again.coverColor, '#3b5f86');
+    assert.equal(again.cover, 'cover.jpg');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
