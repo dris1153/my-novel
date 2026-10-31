@@ -12,7 +12,7 @@ fast path for agents.
   file format + path builders). Consumed as **TypeScript source** (`main: ./src/index.ts`); web needs
   `transpilePackages: ["shared"]`.
 - `packages/crawler` — local CLI: truyenfull → files in a clone of `novel-data` → `git push main`.
-- `DESIGN.md` is the visual system; `plans/` and `docs/wireframe/` are design history, not current spec.
+- `DESIGN.md` is the current visual system ("Thư viện đêm", dark-first); `plans/` and `docs/wireframe/` are design history, not current spec.
 
 ## Commands
 
@@ -60,6 +60,8 @@ because those types are generated. Run `pnpm --filter web exec next typegen` fir
 - The crawler reads the **root** `.env` (`DATA_REPO_DIR`), not `apps/web/.env.local`. `DATA_REPO_DIR`
   must be the git root of the clone and on `main`.
 - Covers are served by `/api/cover/[slug]` (repo is private) and rendered with `unoptimized`.
+- Colours: use the token utilities (`bg-canvas`, `bg-surface`, `text-fg`, `text-fg-2`, `text-accent-fg`, `bg-accent`…), never raw hex in app chrome. `contrast.test.ts` parses `globals.css`; `reader-themes.test.ts` checks the reader palette. Amber as *text* must use `accent-fg` (dark amber in light theme).
+- Chapter titles from the source repeat "<novel> - Chương N:"; `lib/chapter-title.ts` strips that at read time — UI prints "Chương N" itself.
 - `.npmrc` keeps `node-linker=hoisted`; it is no longer required but changing it reinstalls everything.
 - `next dev` generates `apps/web/AGENTS.md` / `CLAUDE.md` (Next 16 breaking-changes notice); keep them in commits.
 
