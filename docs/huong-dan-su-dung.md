@@ -40,38 +40,42 @@ Ví dụ URL: `https://truyenfull.live/dai-phung-da-canh-nhan/`
 
 ## 3. Đọc
 
-Trang chủ → bấm bìa truyện → trang chi tiết:
+Trang chủ → bấm bìa truyện → trang chi tiết (đầu trang nhuộm theo màu bìa):
 
 | Nút | Việc |
 |---|---|
-| **Đọc từ đầu** / **Đọc tiếp chương N** | vào chương; tự đổi thành "Đọc tiếp" khi đang đọc dở |
-| **♡ Theo dõi** | lưu vào tủ truyện |
-| **Mô tả truyện** | bấm để mở / thu gọn |
-| Danh sách chương | 50 chương mới nhất |
-| **Xem mục lục đầy đủ ›** | toàn bộ chương, chia trang, đúng thứ tự đọc |
+| **Đọc từ đầu** / **Đọc tiếp chương N** (thanh dưới cùng) | vào chương; tự đổi thành "Đọc tiếp" khi đang đọc dở |
+| **♡** (cạnh nút đọc) | theo dõi — truyện vào tủ truyện, có báo số chương mới |
+| **Xem thêm** | mở mô tả dài |
+| Chương mới nhất | 5 chương mới nhất; chương đang đọc được đánh dấu |
+| **Mục lục (N)** | toàn bộ chương, chia trang, đúng thứ tự đọc |
 
 Trong trình đọc:
 
 | Thao tác | Kết quả |
 |---|---|
-| `←` `→` | chương trước / chương sau (bàn phím) |
-| `Aa` | chỉnh **cỡ chữ** (6 mức), **nền** (Giấy / Ngả vàng / Đêm / Đen tuyền), **kiểu chữ** (Literata / Inter) |
-| `Mục lục` | nhảy tới chương bất kỳ |
+| Chạm vào chữ | hiện / ẩn thanh điều khiển (tự ẩn sau 3 giây và khi cuộn xuống, hiện lại khi cuộn lên) |
+| `←` `→` hoặc nút ‹ › ở thanh dưới | chương trước / chương sau |
+| `Aa` | **nền** (Giấy / Ngả vàng / Đêm / Đen tuyền), **cỡ chữ** (6 mức), **kiểu chữ** (có chân / không chân), **giãn dòng** (Hẹp / Vừa / Rộng) |
+| Biểu tượng mục lục | nhảy tới chương bất kỳ |
+| Cuối chương | nút **Đọc chương tiếp** |
 | Cuộn | vị trí được lưu khi bạn ở lại chương vài giây, mỗi ~30 giây, và khi ẩn tab; mở lại đúng chỗ đã dừng |
 
-Tuỳ chỉnh đọc (cỡ chữ, nền, kiểu chữ) lưu trên trình duyệt (`localStorage`), không đồng bộ giữa thiết bị.
+Tuỳ chỉnh đọc lưu trên trình duyệt (`localStorage`), không đồng bộ giữa thiết bị.
 
 ---
 
 ## 4. Các trang
 
+Trên điện thoại, 4 tab ở đáy màn hình: **Trang chủ · Thể loại · Tủ truyện · Tôi**; tìm kiếm là kính lúp ở góc trên.
+
 | Đường dẫn | Nội dung |
 |---|---|
-| `/` | "Đang đọc" + tất cả truyện (mới cập nhật trước) |
-| `/tu-truyen` | Chỉ những truyện đã bấm ♡ |
-| `/the-loai` | Duyệt theo thể loại |
+| `/` | "Đang đọc" + chip thể loại + kệ "Mới cập nhật" + tất cả truyện (A→Z) |
+| `/tu-truyen` | Hai tab: **Đang đọc** (tiến độ từng truyện) và **Theo dõi** (truyện đã bấm ♡). Badge **+N** = số chương mới ra từ lần bạn đọc/theo dõi gần nhất; đọc một chương là badge tắt |
+| `/the-loai` | Ô thể loại kèm bìa truyện thật |
 | `/tim-kiem` | Tìm theo tên truyện hoặc tác giả (không cần gõ dấu) |
-| `/toi` | Thông tin tài khoản, đăng xuất |
+| `/toi` | Tài khoản, **giao diện Tự động / Sáng / Tối**, đăng xuất |
 
 ---
 

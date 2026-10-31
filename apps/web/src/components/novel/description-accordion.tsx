@@ -2,45 +2,28 @@
 
 import { useState } from "react";
 
-/**
- * Mô tả truyện — accordion CSS nguyên từ skill transitions-dev (21-accordion):
- * panel giãn bằng `grid-template-rows: 0fr ↔ 1fr`, chevron lật `scaleY`.
- * Mặc định mở.
- */
+/** Mô tả quá dài thì gập còn 4 dòng; đoạn ngắn hiện nguyên, không cần nút. */
+const LONG = 220;
+
 export function DescriptionAccordion({ text }: { text: string }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+  const long = text.length > LONG;
 
   return (
-    <div className="t-acc mt-8" data-open={open}>
-      <button
-        type="button"
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-        className="t-acc-head flex w-full items-center justify-between gap-3 text-left">
-        <span className="text-sm text-ink-2">Mô tả truyện</span>
-        <span className="t-acc-chevron text-ink-3">
-          <svg
-            viewBox="0 0 16 16"
-            width="16"
-            height="16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden>
-            <path d="M4 6.5L8 10.5L12 6.5" />
-          </svg>
-        </span>
-      </button>
-
-      <div className="t-acc-panel">
-        <div className="t-acc-panel-inner">
-          <p className="pt-3 text-[15px] leading-relaxed whitespace-pre-line text-ink-2">
-            {text}
-          </p>
-        </div>
-      </div>
+    <div>
+      <p
+        className={`text-[15px] leading-relaxed whitespace-pre-line text-fg-2 ${long && !open ? "line-clamp-4" : ""}`}>
+        {text}
+      </p>
+      {long && (
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+          className="mt-1 min-h-11 text-sm font-semibold text-accent-fg">
+          {open ? "Thu gọn" : "Xem thêm"}
+        </button>
+      )}
     </div>
   );
 }

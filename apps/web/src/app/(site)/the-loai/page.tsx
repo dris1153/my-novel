@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { connection } from "next/server";
 
-import { DoodleCompass } from "@/components/doodles";
-import { SectionHeading } from "@/components/ui/section-heading";
-import { fetchGenres } from "@/lib/queries";
+import { GenreTile } from "@/components/novel/genre-tile";
+import { EmptyState } from "@/components/ui/empty-state";
+import { fetchGenreTiles } from "@/lib/queries";
 
 export const metadata = {
   title: "Thể loại",
@@ -13,33 +12,22 @@ export const metadata = {
 export default async function GenresPage() {
   // Không prerender lúc build (cần GitHub token); vẫn dùng data cache.
   await connection();
-  const genres = await fetchGenres();
+  const tiles = await fetchGenreTiles();
+  // Thể loại có truyện lên trước, giữ thứ tự chữ cái trong mỗi nhóm.
+  const sorted = [...tiles].sort((a, b) => Number(b.count > 0) - Number(a.count > 0));
 
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-6 pt-12">
-      <div className="relative">
-        <DoodleCompass size={72} rotate={-10} className="mx-auto" wash />
-        <SectionHeading
-          title="Thể loại"
-          subtitle="Chọn một thể loại để xem danh sách truyện."
-          className="mt-6"
-        />
-      </div>
+    <main className="mx-auto w-full max-w-[1200px] px-4 pt-6 lg:px-6 lg:pt-10">
+      <h1 className="font-serif text-2xl font-bold text-fg lg:text-3xl">Thể loại</h1>
+      <p className="mt-1 text-sm text-fg-2">Chọn một thể loại để xem danh sách truyện.</p>
 
-      {genres.length === 0 ? (
-        <p className="mt-14 text-center text-sm text-ink-3">Chưa có thể loại nào.</p>
+      {sorted.length === 0 ? (
+        <EmptyState art="no-results" title="Chưa có thể loại nào" />
       ) : (
-        <ul className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {genres.map((genre) => (
-            <li key={genre.slug}>
-              <Link
-                href={`/the-loai/${genre.slug}`}
-                className="flex items-center justify-between rounded-lg border border-line px-4 py-3 font-serif text-[18px] text-ink transition-colors hover:border-ink">
-                {genre.name}
-                <span aria-hidden className="text-ink-3">
-                  ›
-                </span>
-              </Link>
+        <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-4">
+          {sorted.map((tile) => (
+            <li key={tile.slug}>
+              <GenreTile tile={tile} />
             </li>
           ))}
         </ul>

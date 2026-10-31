@@ -2,38 +2,28 @@ import { ChapterToc } from "./chapter-list";
 
 import { pagedHref, PageNav } from "@/components/ui/page-nav";
 import { fetchChapterList } from "@/lib/queries";
+import { readMyStateOrEmpty } from "@/lib/state-store";
 
 export const TOC_PAGE_SIZE = 100;
 
 /** Mục lục đầy đủ theo thứ tự đọc, phân trang để truyện 2000+ chương không khựng. */
-export async function TocList({
-  slug,
-  page,
-}: {
-  slug: string;
-  page: number;
-}) {
+export async function TocList({ slug, page }: { slug: string; page: number }) {
   const offset = (page - 1) * TOC_PAGE_SIZE;
-  const rows = await fetchChapterList(slug, {
-    limit: TOC_PAGE_SIZE + 1,
-    offset,
-    newestFirst: false,
-  });
+  const [rows, state] = await Promise.all([
+    fetchChapterList(slug, { limit: TOC_PAGE_SIZE + 1, offset, newestFirst: false }),
+    readMyStateOrEmpty(),
+  ]);
   const hasMore = rows.length > TOC_PAGE_SIZE;
   const chapters = rows.slice(0, TOC_PAGE_SIZE);
 
   if (chapters.length === 0) {
-    return <p className="mt-6 text-sm text-ink-3">Chưa có chương nào.</p>;
+    return <p className="mt-6 text-sm text-fg-2">Chưa có chương nào.</p>;
   }
 
   return (
     <>
-      <ChapterToc slug={slug} chapters={chapters} />
-      <PageNav
-        page={page}
-        hasMore={hasMore}
-        hrefFor={(target) => pagedHref(`/truyen/${slug}/muc-luc`, target)}
-      />
+      <ChapterToc slug={slug} chapters={chapters} current={state.progress[slug]?.chapter ?? null} />
+      <PageNav page={page} hasMore={hasMore} hrefFor={(target) => pagedHref(`/truyen/${slug}/muc-luc`, target)} />
     </>
   );
 }

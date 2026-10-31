@@ -11,6 +11,7 @@ import {
   type StoreGenre,
 } from "shared";
 
+import { cleanChapterTitle } from "./chapter-title";
 import { readJson, readText } from "./github-store";
 
 export type Genre = StoreGenre;
@@ -31,6 +32,7 @@ export type ChapterView = {
   /** Chương liền trước/sau trong mục lục; `chapters.json` có thể có lỗ hổng nên không dùng ±1. */
   prevNumber: number | null;
   nextNumber: number | null;
+  nextTitle: string | null;
   total: number;
 };
 
@@ -43,7 +45,8 @@ async function getIndex(): Promise<NovelIndex> {
 }
 
 async function getChapters(slug: string): Promise<ChapterEntry[]> {
-  return (await readJson<ChapterEntry[]>(chaptersIndexPath(slug))) ?? [];
+  const entries = (await readJson<ChapterEntry[]>(chaptersIndexPath(slug))) ?? [];
+  return entries.map((e) => ({ n: e.n, title: cleanChapterTitle(e.title, e.n) }));
 }
 
 /** Bìa nằm trong repo private nên đi qua route proxy `/api/cover/[slug]`. */
@@ -70,11 +73,6 @@ function fold(text: string): string {
 export async function fetchRecent(limit = 24, offset = 0): Promise<NovelCard[]> {
   const { novels } = await getIndex();
   return novels.slice(offset, offset + limit).map(toCard);
-}
-
-export async function fetchGenres(): Promise<Genre[]> {
-  const { genres } = await getIndex();
-  return [...genres].sort((a, b) => a.name.localeCompare(b.name, "vi"));
 }
 
 export async function fetchGenre(slug: string): Promise<Genre | null> {
@@ -148,6 +146,7 @@ export async function fetchChapter(slug: string, number: number): Promise<Chapte
     chapter: { number, title: entry.title, content },
     prevNumber: entries[at - 1]?.n ?? null,
     nextNumber: entries[at + 1]?.n ?? null,
+    nextTitle: entries[at + 1]?.title ?? null,
     total: entries[entries.length - 1].n,
   };
 }
@@ -165,4 +164,23 @@ export async function fetchNovelCards(slugs: string[]): Promise<NovelCard[]> {
 export async function fetchChapterTitle(slug: string, number: number): Promise<string | null> {
   if (!isSlug(slug)) return null;
   return (await getChapters(slug)).find((e) => e.n === number)?.title ?? null;
+}
+
+export type GenreTile = Genre & { count: number; covers: NovelCard[] };
+
+/** Ô thể loại: số truyện + vài bìa thật để ghép — lấy hết từ index.json, không gọi thêm GitHub. */
+export async function fetchGenreTiles(): Promise<GenreTile[]> {
+  const { genres, novels } = await getIndex();
+  return [...genres]
+    .sort((a, b) => a.name.localeCompare(b.name, "vi"))
+    .map((genre) => {
+      const list = novels.filter((n) => n.genres.includes(genre.slug));
+      return { ...genre, count: list.length, covers: list.slice(0, 3).map(toCard) };
+    });
+}
+
+/** Toàn bộ truyện dạng thẻ (index đã nhỏ và được cache) — cho tủ truyện ghép với state. */
+export async function fetchAllNovelCards(): Promise<NovelCard[]> {
+  const { novels } = await getIndex();
+  return novels.map(toCard);
 }

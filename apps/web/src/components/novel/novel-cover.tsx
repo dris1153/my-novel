@@ -2,8 +2,8 @@ import Image from "next/image";
 
 import { cn } from "@/lib/cn";
 
-/** Bìa thiếu ảnh vẫn phải phân biệt được → màu suy từ slug, tông trầm Opennote. */
-const FALLBACKS = ["#5b4636", "#2f3a52", "#4a3c5c", "#38503a", "#6b5330", "#4b3040"];
+/** Bìa thiếu ảnh vẫn phải phân biệt được → màu suy từ slug (hoặc màu bìa đã tính sẵn). */
+const FALLBACKS = ["#3b4f6b", "#5b3a3a", "#3f5a3d", "#4f3f63", "#6b5530", "#2f5c59"];
 
 function colorFor(seed: string) {
   let h = 0;
@@ -15,6 +15,7 @@ export function NovelCover({
   uri,
   title,
   seed,
+  color,
   sizes = "(min-width:1024px) 200px, (min-width:640px) 30vw, 45vw",
   priority = false,
   className,
@@ -22,6 +23,7 @@ export function NovelCover({
   uri: string | null;
   title: string;
   seed: string;
+  color?: string | null;
   sizes?: string;
   priority?: boolean;
   className?: string;
@@ -29,7 +31,7 @@ export function NovelCover({
   return (
     <div
       className={cn(
-        "relative aspect-[2/3] w-full overflow-hidden rounded-lg border border-line bg-halo",
+        "relative aspect-[2/3] w-full overflow-hidden rounded-cover bg-surface shadow-[0_8px_20px_rgba(0,0,0,0.28)] ring-1 ring-line/60",
         className
       )}>
       {uri ? (
@@ -45,10 +47,10 @@ export function NovelCover({
         />
       ) : (
         <div
-          className="flex h-full w-full items-end p-2"
-          style={{ backgroundColor: colorFor(seed) }}>
-          {/* Nền fallback luôn tối nên chữ phải là ivory cố định, không theo theme. */}
-          <span className="line-clamp-3 font-serif text-[13px] leading-tight text-[#fffdf8]">
+          className="flex h-full w-full items-end bg-gradient-to-b from-white/5 to-black/40 p-2"
+          style={{ backgroundColor: color ?? colorFor(seed) }}>
+          {/* Nền fallback luôn tối nên chữ cố định màu sáng, không theo theme. */}
+          <span className="line-clamp-3 font-serif text-[13px] leading-tight font-semibold text-[#f4efe6]">
             {title}
           </span>
         </div>

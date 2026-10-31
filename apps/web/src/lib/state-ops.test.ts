@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { UserState } from "shared/src/store.ts";
-import { latestProgress, setProgress, setSaved } from "./state-ops.ts";
+import { latestProgress, markSeen, setProgress, setSaved } from "./state-ops.ts";
 
 const empty: UserState = { library: [], progress: {} };
 const T1 = "2026-01-01T00:00:00.000Z";
@@ -60,4 +60,12 @@ test("latestProgress chọn updatedAt mới nhất; rỗng → null", () => {
   assert.equal(latestProgress(empty), null);
   const s = setProgress(setProgress(empty, { slug: "a", chapter: 1, scroll: 0 }, T1), { slug: "b", chapter: 2, scroll: 0 }, T2);
   assert.equal(latestProgress(s)?.slug, "b");
+});
+
+test("markSeen: không đổi → cùng tham chiếu; state cũ không có seen vẫn ghi được", () => {
+  const a = markSeen(empty, "a", 10);
+  assert.deepEqual(a.seen, { a: 10 });
+  assert.equal(markSeen(a, "a", 10), a);
+  assert.deepEqual(markSeen(a, "b", 3).seen, { a: 10, b: 3 });
+  assert.equal(markSeen(a, "a", 12).seen?.a, 12);
 });

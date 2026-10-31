@@ -1,5 +1,6 @@
-import { NovelGridCard } from "./novel-card";
+import { NovelGrid } from "./novel-card";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { pagedHref, PageNav } from "@/components/ui/page-nav";
 import { fetchByGenre } from "@/lib/queries";
 
@@ -14,22 +15,20 @@ export async function GenreList({ slug, page }: { slug: string; page: number }) 
   const novels = rows.slice(0, GENRE_PAGE_SIZE);
 
   if (novels.length === 0) {
-    return <p className="mt-10 text-sm text-ink-3">Chưa có truyện nào trong thể loại này.</p>;
+    return (
+      <EmptyState
+        art="no-results"
+        title="Chưa có truyện nào"
+        description="Thể loại này chưa có truyện. Thử thể loại khác nhé."
+        action={{ href: "/the-loai", label: "Xem thể loại khác" }}
+      />
+    );
   }
 
   return (
-    <>
-      <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
-        {novels.map((novel) => (
-          <NovelGridCard key={novel.slug} novel={novel} />
-        ))}
-      </div>
-
-      <PageNav
-        page={page}
-        hasMore={hasMore}
-        hrefFor={(target) => pagedHref(`/the-loai/${slug}`, target)}
-      />
-    </>
+    <div className="mt-6">
+      <NovelGrid novels={novels} priorityCount={page === 1 ? 6 : 0} />
+      <PageNav page={page} hasMore={hasMore} hrefFor={(target) => pagedHref(`/the-loai/${slug}`, target)} />
+    </div>
   );
 }

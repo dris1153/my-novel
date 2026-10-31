@@ -30,6 +30,12 @@ export function setProgress(
   return { ...state, progress: pruneProgress({ ...state.progress, [patch.slug]: entry }) };
 }
 
+/** Ghi nhận đã thấy `count` chương của truyện — gốc tính badge "+N chương mới". */
+export function markSeen(state: UserState, slug: string, count: number): UserState {
+  if (state.seen?.[slug] === count) return state;
+  return { ...state, seen: { ...state.seen, [slug]: count } };
+}
+
 /** Giữ MAX_PROGRESS truyện mới nhất để file state không phình mãi. */
 function pruneProgress(progress: Record<string, ProgressEntry>): Record<string, ProgressEntry> {
   const entries = Object.entries(progress);

@@ -1,7 +1,8 @@
 import { isSlug } from "shared/src/store.ts";
 
 import { getAuthorizedUser } from "@/lib/auth";
-import { setProgress } from "@/lib/state-ops";
+import { fetchNovelCards } from "@/lib/queries";
+import { markSeen, setProgress } from "@/lib/state-ops";
 import { mutateMyState } from "@/lib/state-store";
 
 const MAX_CHAPTER = 1_000_000;
@@ -26,6 +27,11 @@ export async function POST(req: Request) {
   }
 
   const now = new Date().toISOString();
-  await mutateMyState((state) => setProgress(state, { slug, chapter, scroll }, now));
+  // Đọc tới đâu cũng coi như đã thấy số chương hiện có — tắt badge "+N" trong cùng một commit.
+  const [novel] = await fetchNovelCards([slug]).catch(() => []);
+  await mutateMyState((state) => {
+    const next = setProgress(state, { slug, chapter, scroll }, now);
+    return novel ? markSeen(next, slug, novel.chapterCount) : next;
+  });
   return new Response(null, { status: 204 });
 }

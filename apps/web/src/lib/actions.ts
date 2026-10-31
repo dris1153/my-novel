@@ -4,7 +4,8 @@ import { isSlug } from "shared/src/store.ts";
 
 import { signIn, signOut } from "@/auth";
 import { requireUser } from "@/lib/auth";
-import { setSaved } from "@/lib/state-ops";
+import { fetchNovelCards } from "@/lib/queries";
+import { markSeen, setSaved } from "@/lib/state-ops";
 import { mutateMyState } from "@/lib/state-store";
 
 export async function signInWithGoogle(formData: FormData) {
@@ -23,5 +24,10 @@ export async function setNovelSaved(slug: string, saved: boolean) {
   await requireUser();
   if (!isSlug(slug)) throw new Error("slug không hợp lệ");
   const now = new Date().toISOString();
-  await mutateMyState((state) => setSaved(state, slug, saved, now));
+  // Bắt đầu theo dõi = mốc tính "+N chương mới" từ đây trở đi.
+  const [novel] = saved ? await fetchNovelCards([slug]).catch(() => []) : [];
+  await mutateMyState((state) => {
+    const next = setSaved(state, slug, saved, now);
+    return novel ? markSeen(next, slug, novel.chapterCount) : next;
+  });
 }
