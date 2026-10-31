@@ -16,22 +16,14 @@ export function PageNav({
   if (page <= 1 && !hasMore) return null;
 
   return (
-    <nav className="mt-8 flex items-center justify-between gap-4" aria-label="Phân trang">
-      {page > 1 ? (
+    <nav className="mt-8 flex items-center justify-center gap-4" aria-label="Phân trang">
+      {page > 1 && (
         <ButtonLink variant="secondary" href={hrefFor(page - 1)}>
           ‹ Trang trước
         </ButtonLink>
-      ) : (
-        <span />
       )}
-
-      <span className="text-sm text-fg-3">Trang {page}</span>
-
-      {hasMore ? (
-        <ButtonLink href={hrefFor(page + 1)}>Trang sau ›</ButtonLink>
-      ) : (
-        <span />
-      )}
+      <span className="text-sm font-semibold text-fg">Trang {page}</span>
+      {hasMore && <ButtonLink href={hrefFor(page + 1)}>Trang sau ›</ButtonLink>}
     </nav>
   );
 }

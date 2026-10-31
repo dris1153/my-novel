@@ -37,3 +37,22 @@ Mascot, kết thúc chung: *"Single isolated character, centered, nothing touchi
 | cat-reading | Same calico cat, same sticker style, sitting on the cloud holding an open blue book with both paws, reading happily, one small pink heart above. |
 | boy-cat | A cute chibi boy with messy dark brown hair lying on his stomach on a cloud, reading an open blue book held in front of him, big gentle eyes over the book; the same calico cat sleeping on top of his head. |
 | logo-book | App logo icon: an open book seen from the front, thick rounded dark indigo outline, pages in soft periwinkle and lavender gradient, three small golden sparkles above. Bold, minimal, readable at 40 pixels. |
+
+## Vòng 2: trang thể loại (2026-10-31)
+
+- 2 mockup (`mockup-the-loai.png`, `mockup-the-loai-chi-tiet.png`): image-to-image từ `reference-mockup.png`, 3:2, 24 credit (task `01a1913c-26d3-70bb-8bb2-50ab535ebecc`, `01a1913c-2f50-7591-9c38-a1293b55d66b`).
+- 10 tranh thể loại: image-to-image, tham chiếu là ô tương ứng cắt từ `mockup-the-loai.png`, 3:2, 120 credit. Chuyển 2 cỡ: `… genres/<slug>.webp 1200 800 66` và `… genres/<slug>-sm.webp 600 400 72`.
+- Prompt chung: *"Recreate this illustration cleanly at high quality in the same soft pastel anime watercolor style and <palette> palette: <subject>. Composition: wide; the main motif in the upper-right two-thirds; the bottom-left third is calm, pale, nearly empty <colour> for a title overlay; all edges soft. No text, no letters, no logo, no watermark, no UI elements, no border."*
+
+| Slug | Task id | Palette | Subject |
+|---|---|---|---|
+| tien-hiep | 01a19141-359f-7024-b35e-7565043e4258 | lavender-blue | pagoda on a floating peak with a waterfall, misty peaks, sea of clouds, pale moon |
+| kiem-hiep | 01a19141-3907-77bb-85f7-af72550d852a | lavender | floating Chinese straight sword with a lavender silk ribbon, peach blossoms |
+| ngon-tinh | 01a19141-3b43-72de-96d2-d46030a26408 | pink | love letter with a heart seal, pink roses, petals |
+| do-thi | 01a19141-3d64-7634-aff7-e6a1a82b6d69 | peach-lavender | city skyline at a peach sunset above clouds |
+| trinh-tham | 01a19141-3f75-71d8-84c3-7cc325277826 | mint | magnifying glass, detective fedora, letter, paw prints |
+| huyen-huyen | 01a19141-41a1-7506-8848-7947ef124bd0 | violet | purple eastern dragon among misty peaks |
+| khoa-huyen | 01a19141-43f2-757d-b9d9-29acd0bf9211 | blue | ringed planet, spaceship over a futuristic city |
+| tam-ly | 01a19141-4643-7598-a219-695deb00fef5 | cream-yellow | open book and coffee on a sill, autumn leaves |
+| gia-dinh | 01a19141-489a-741c-9dde-37de03d87b7a | mint-green | family house with garden and blossom trees |
+| lich-su | 01a19141-4aee-757b-b610-2ad93d3ab543 | coral-red | red palace pagoda, maple leaves |

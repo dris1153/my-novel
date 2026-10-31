@@ -40,12 +40,13 @@ export default async function SearchPage({ searchParams }: PageProps<"/tim-kiem"
         </section>
       ) : results.length === 0 ? (
         <EmptyState
+          className="mt-4"
           art="no-results"
           title="Không tìm thấy truyện"
           description={`Không có truyện nào khớp “${q}”. Thử tên ngắn hơn hoặc tên tác giả.`}
         />
       ) : (
-        <div className="mt-4 rounded-card bg-surface p-3 lg:p-5">
+        <div className="mt-4">
           <p className="mb-4 text-sm text-fg-2">
             {results.length}
             {hasMore ? "+" : ""} kết quả cho “{q}”

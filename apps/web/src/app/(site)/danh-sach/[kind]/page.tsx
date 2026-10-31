@@ -19,7 +19,7 @@ export default async function ListPage({ params }: PageProps<"/danh-sach/[kind]"
   if (!list) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-4 pt-4 lg:px-6 lg:pt-6">
+    <main className="mx-auto flex w-full max-w-[1320px] flex-col gap-4 px-4 lg:px-6">
       <h1 className="border-l-4 border-accent pl-3 font-heading text-2xl font-bold text-fg lg:text-3xl">{list.title}</h1>
       <Suspense fallback={<NovelGridSkeleton />}>
         <PagedNovelGrid
