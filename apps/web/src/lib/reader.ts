@@ -13,8 +13,8 @@ export type ReaderPrefs = {
   lineHeight: ReaderLineHeight;
 };
 
-// App dark-first nên nền đọc mặc định là Đêm. Prefs đã lưu (khoá cũ) được merge, không mất.
-const DEFAULTS: ReaderPrefs = { sizeIndex: 2, theme: "night", serif: true, lineHeight: "normal" };
+// App light-first nên nền đọc mặc định là Giấy. Prefs đã lưu (khoá cũ) được merge, không mất.
+const DEFAULTS: ReaderPrefs = { sizeIndex: 2, theme: "paper", serif: true, lineHeight: "normal" };
 const KEY = "web-reader-prefs-v1";
 
 /**

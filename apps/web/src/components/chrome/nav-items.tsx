@@ -62,6 +62,15 @@ export const NAV = [
   { href: "/toi", label: "Tôi", Icon: UserIcon },
 ] as const;
 
+/** Thanh nav slate trên màn rộng — có thêm 2 danh sách vì không bị giới hạn 4 ô như tab bar. */
+export const DESKTOP_NAV = [
+  { href: "/", label: "Trang chủ" },
+  { href: "/the-loai", label: "Thể loại" },
+  { href: "/danh-sach/moi-cap-nhat", label: "Mới cập nhật" },
+  { href: "/danh-sach/hoan-thanh", label: "Truyện full" },
+  { href: "/tu-truyen", label: "Tủ truyện" },
+] as const;
+
 export function isActive(pathname: string, href: string): boolean {
   return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 }

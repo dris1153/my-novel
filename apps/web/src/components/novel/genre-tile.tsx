@@ -17,7 +17,7 @@ export function GenreTile({ tile }: { tile: Tile }) {
         empty ? "bg-subtle" : "bg-surface"
       )}>
       <div className="relative z-10 flex flex-col">
-        <span className={cn("font-serif text-[17px] leading-tight font-semibold", empty ? "text-fg-2" : "text-fg")}>{tile.name}</span>
+        <span className={cn("font-heading text-[17px] leading-tight font-semibold", empty ? "text-fg-2" : "text-fg")}>{tile.name}</span>
         <span className="mt-1 text-xs text-fg-2">{empty ? "Chưa có truyện" : `${tile.count} truyện`}</span>
       </div>
 

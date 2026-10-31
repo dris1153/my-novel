@@ -16,9 +16,9 @@ export function PageNav({
   if (page <= 1 && !hasMore) return null;
 
   return (
-    <nav className="mt-10 flex items-center justify-between gap-4" aria-label="Phân trang">
+    <nav className="mt-8 flex items-center justify-between gap-4" aria-label="Phân trang">
       {page > 1 ? (
-        <ButtonLink variant="ghost" href={hrefFor(page - 1)}>
+        <ButtonLink variant="secondary" href={hrefFor(page - 1)}>
           ‹ Trang trước
         </ButtonLink>
       ) : (
@@ -28,14 +28,18 @@ export function PageNav({
       <span className="text-sm text-fg-3">Trang {page}</span>
 
       {hasMore ? (
-        <ButtonLink variant="ghost" href={hrefFor(page + 1)}>
-          Trang sau ›
-        </ButtonLink>
+        <ButtonLink href={hrefFor(page + 1)}>Trang sau ›</ButtonLink>
       ) : (
         <span />
       )}
     </nav>
   );
+}
+
+/** Số trang trong `/trang/N`: chỉ nhận số nguyên ≥2 (trang 1 là URL gốc) — sai thì `null` để trang gọi `notFound()`. */
+export function parsePageParam(raw: string): number | null {
+  const n = Number(raw);
+  return Number.isInteger(n) && n >= 2 ? n : null;
 }
 
 /** Trang 1 là URL gốc, các trang sau nằm dưới `/trang/N`. */

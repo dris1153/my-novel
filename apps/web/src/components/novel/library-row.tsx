@@ -21,7 +21,7 @@ export function LibraryRow({ row }: { row: Row<NovelCard> }) {
 
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex items-start gap-2">
-            <span className="line-clamp-2 flex-1 font-serif text-[15px] leading-snug font-semibold text-fg group-hover:text-accent-fg">
+            <span className="line-clamp-2 flex-1 font-heading text-[15px] leading-snug font-semibold text-fg group-hover:text-accent-fg">
               {novel.title}
             </span>
             {newCount > 0 && (

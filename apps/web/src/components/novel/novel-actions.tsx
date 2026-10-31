@@ -4,7 +4,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { readMyStateOrEmpty } from "@/lib/state-store";
 
 /**
- * Thanh hành động ghim đáy trang truyện (thay chỗ tab bar): theo dõi + "Đọc tiếp chương N".
+ * Hàng nút ngay dưới khối thông tin: "Đọc tiếp chương N" (xanh) · "DS.Chương" (xám) · theo dõi.
  * Màu nhấn chỉ dùng cho nút đọc — hành động chính duy nhất của trang.
  */
 export async function NovelActions({ slug, firstNumber }: { slug: string; firstNumber: number | null }) {
@@ -13,19 +13,20 @@ export async function NovelActions({ slug, firstNumber }: { slug: string; firstN
   const target = resume ?? firstNumber;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-      <div className="mx-auto flex w-full max-w-[760px] gap-3">
-        <FollowButton slug={slug} initialSaved={state.library.some((e) => e.slug === slug)} iconOnly />
-        {target !== null ? (
-          <ButtonLink href={`/truyen/${slug}/chuong/${target}`} className="min-h-13 flex-1 text-[15px]">
-            {resume ? `Đọc tiếp chương ${resume}` : "Đọc từ đầu"}
-          </ButtonLink>
-        ) : (
-          <span className="flex min-h-13 flex-1 items-center justify-center rounded-xl bg-surface text-sm text-fg-2">
-            Chưa có chương nào
-          </span>
-        )}
-      </div>
+    <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+      {target !== null ? (
+        <ButtonLink href={`/truyen/${slug}/chuong/${target}`} className="col-span-2 min-h-12 text-[15px]">
+          {resume ? `Đọc tiếp chương ${resume}` : "Đọc từ đầu"}
+        </ButtonLink>
+      ) : (
+        <span className="col-span-2 flex min-h-12 items-center justify-center rounded-control bg-subtle px-5 text-sm text-fg-2">
+          Chưa có chương nào
+        </span>
+      )}
+      <ButtonLink variant="secondary" href={`/truyen/${slug}/muc-luc`} className="min-h-12">
+        DS.Chương
+      </ButtonLink>
+      <FollowButton slug={slug} initialSaved={state.library.some((e) => e.slug === slug)} />
     </div>
   );
 }

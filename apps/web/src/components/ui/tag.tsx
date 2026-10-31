@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 
-/** Chip dạng viên thuốc — thể loại, trạng thái. `active` đảo màu (chip đang chọn). */
+/** Chip viền xanh dạng viên thuốc — thể loại, trạng thái. `active` tô đặc (chip đang chọn). */
 export function Tag({
   children,
   active = false,
@@ -13,8 +13,8 @@ export function Tag({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-3.5 py-2 text-[13px] leading-none font-medium",
-        active ? "border-fg bg-fg text-canvas" : "border-line bg-subtle text-fg-2",
+        "inline-flex items-center rounded-full border px-3.5 py-2 text-[13px] leading-none font-medium whitespace-nowrap",
+        active ? "border-accent bg-accent text-on-accent" : "border-accent-fg/60 bg-surface text-accent-fg",
         className
       )}>
       {children}

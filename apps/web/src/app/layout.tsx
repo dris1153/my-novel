@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro, Noto_Serif } from "next/font/google";
+import { Be_Vietnam_Pro, Roboto_Condensed } from "next/font/google";
 
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
 
-// Be Vietnam Pro cho giao diện, Noto Serif cho tiêu đề. Literata (thân truyện) chỉ nạp ở (reader).
+// Be Vietnam Pro cho giao diện, Roboto Condensed cho tiêu đề/nav. Literata (thân truyện) chỉ nạp ở (reader).
 const beVietnam = Be_Vietnam_Pro({
   variable: "--font-be-vietnam",
   subsets: ["latin", "vietnamese"],
@@ -13,10 +13,9 @@ const beVietnam = Be_Vietnam_Pro({
   display: "swap",
 });
 
-const notoSerif = Noto_Serif({
-  variable: "--font-noto-serif",
+const robotoCondensed = Roboto_Condensed({
+  variable: "--font-roboto-condensed",
   subsets: ["latin", "vietnamese"],
-  weight: ["600", "700"],
   display: "swap",
 });
 
@@ -29,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 // `cover` để nội dung tràn tới mép máy có tai thỏ; tab bar tự chừa `safe-area-inset-bottom`.
-export const viewport: Viewport = { viewportFit: "cover", themeColor: "#111113" };
+export const viewport: Viewport = { viewportFit: "cover", themeColor: "#ffffff" };
 
 /**
  * Layout gốc chỉ lo html/body/font/theme + provider.
@@ -37,7 +36,7 @@ export const viewport: Viewport = { viewportFit: "cover", themeColor: "#111113" 
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="vi" suppressHydrationWarning className={`${beVietnam.variable} ${notoSerif.variable}`}>
+    <html lang="vi" suppressHydrationWarning className={`${beVietnam.variable} ${robotoCondensed.variable}`}>
       <body>
         <ThemeProvider>{children}</ThemeProvider>
       </body>

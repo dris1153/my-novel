@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { cn } from "@/lib/cn";
 
-/** Tiêu đề mục (serif) + link "Xem tất cả" tuỳ chọn ở bên phải. */
+/** Tiêu đề mục có vạch xanh bên trái + link "Thêm →" tuỳ chọn ở bên phải. */
 export function SectionHeading({
   title,
   action,
@@ -13,12 +13,14 @@ export function SectionHeading({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-end justify-between gap-4", className)}>
-      <div className="min-w-0">
-        <h2 className="font-serif text-xl leading-tight font-semibold text-fg">{title}</h2>
-      </div>
+    <div className={cn("flex items-center justify-between gap-4", className)}>
+      <h2 className="min-w-0 border-l-4 border-accent pl-2.5 font-heading text-lg leading-snug font-bold text-fg">
+        {title}
+      </h2>
       {action && (
-        <Link href={action.href} className="inline-flex min-h-11 shrink-0 items-center text-sm font-medium text-fg-2 hover:text-fg">
+        <Link
+          href={action.href}
+          className="inline-flex min-h-11 shrink-0 items-center text-sm font-medium text-accent-fg hover:underline">
           {action.label}
         </Link>
       )}

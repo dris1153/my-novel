@@ -3,39 +3,38 @@
 /* next-themes gắn class `dark` lên <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Token "Thư viện đêm" ───────────────────────────────────────────────
-   Dark là mặc định (ThemeProvider), light là biến thể. Thang xám theo Radix slate.
-   Mọi cặp chữ/nền phải ≥4.5:1 — src/lib/contrast.test.ts đọc thẳng file này. */
+/* ── Token "Ngọc Lục" ───────────────────────────────────────────────────
+   Light là mặc định (ThemeProvider): khối trắng (surface) trên nền trang xám (canvas).
+   Dark là tuỳ chọn. Mọi cặp chữ/nền phải ≥4.5:1 — src/lib/contrast.test.ts đọc thẳng file này. */
 :root {
-  --canvas: #fcfcfd;
-  --subtle: #f9f9fb;
-  --surface: #f0f0f3;
+  --canvas: #f0f2f5;
+  --surface: #ffffff;
+  --subtle: #f7f8fa; /* ô nhập, chip, khung chờ nằm trong khối trắng */
   --raised: #ffffff;
-  --hover: #e8e8ec;
-  --line: #d9d9e0;
-  --line-strong: #cdced6;
+  --hover: #eef0f3;
+  --line: #e4e6eb;
+  --line-strong: #cdd0d5;
 
   --fg: #1c2024;
   --fg-2: #60646c;
   --fg-3: #65696f; /* chữ phụ nhỏ nhất vẫn phải đạt AA */
 
-  --accent: #f2b25c; /* nền nút chính; chữ trên nó là --on-accent */
-  --on-accent: #1a1206;
-  --accent-fg: #8a5200; /* hổ phách làm chữ/link: #f2b25c không đủ tương phản trên nền sáng */
-  --accent-soft: #fbefd9;
+  --accent: #15803d; /* nền nút chính; chữ trên nó là --on-accent */
+  --on-accent: #ffffff;
+  --accent-fg: #166534; /* xanh làm chữ/link: #15803d chỉ ~4.47:1 trên nền trang xám */
+  --accent-soft: #dcfce7;
+  --accent-hover: #166534; /* hover nút chính: làm sáng #15803d sẽ tụt dưới 4.5:1 với chữ trắng */
 
-  --ink-art: #1c2024; /* màu tô mask minh hoạ thủy mặc */
+  --hot-fg: #b91c1c; /* chỉ cho số chương; #dc2626 trượt AA trên nền xám */
 
-  /* Độ đậm màu bìa ở tâm gradient. Light phải nhạt hơn nhiều: màu bìa đã kẹp tối nên
-     đậm quá sẽ làm nền dưới chữ tối kém tương phản (src/lib/tint.test.ts). */
-  --tint-card: 12%;
-  --tint-hero: 25%;
+  --bar: #2f3640; /* thanh nav desktop + thanh trên trình đọc */
+  --on-bar: #ffffff;
 }
 
 html.dark {
   --canvas: #111113;
-  --subtle: #18191b;
-  --surface: #212225;
+  --surface: #18191b;
+  --subtle: #212225;
   --raised: #272a2d;
   --hover: #2e3135;
   --line: #2e3135;
@@ -45,15 +44,16 @@ html.dark {
   --fg-2: #b0b4ba;
   --fg-3: #9a9ea6;
 
-  --accent: #f2b25c;
-  --on-accent: #1a1206;
-  --accent-fg: #f2b25c;
-  --accent-soft: #2a2116;
+  --accent: #22c55e;
+  --on-accent: #052e16;
+  --accent-fg: #4ade80;
+  --accent-soft: #12261a;
+  --accent-hover: #4ade80;
 
-  --ink-art: #edeef0;
+  --hot-fg: #f87171;
 
-  --tint-card: 50%;
-  --tint-hero: 75%;
+  --bar: #18191b;
+  --on-bar: #edeef0;
 }
 
 /* ── Map sang utility Tailwind ──────────────────────────────────────────
@@ -74,15 +74,19 @@ html.dark {
   --color-on-accent: var(--on-accent);
   --color-accent-fg: var(--accent-fg);
   --color-accent-soft: var(--accent-soft);
-  --color-ink-art: var(--ink-art);
+  --color-accent-hover: var(--accent-hover);
+  --color-hot-fg: var(--hot-fg);
+  --color-bar: var(--bar);
+  --color-on-bar: var(--on-bar);
 
   --font-sans: var(--font-be-vietnam), system-ui, -apple-system, sans-serif;
-  --font-serif: var(--font-noto-serif), Georgia, "Times New Roman", serif;
+  --font-heading: var(--font-roboto-condensed), "Arial Narrow", system-ui, sans-serif;
   --font-read: var(--font-literata), Georgia, "Times New Roman", serif;
 
-  --radius-cover: 6px;
-  --radius-card: 14px;
-  --radius-sheet: 22px;
+  --radius-cover: 4px;
+  --radius-control: 6px;
+  --radius-card: 8px;
+  --radius-sheet: 16px;
 }
 
 body {
@@ -99,10 +103,11 @@ body {
 
 /* Trong @layer base để utility (vd `outline-none` của ô nhập đã có viền focus riêng) ghi đè được. */
 @layer base {
-  /* accent-fg chứ không phải accent: hổ phách sáng chỉ đạt ~1.8:1 trên nền light. */
+  /* accent-fg là màu nhấn đã đạt tương phản trên mọi nền; vùng nền tối (thanh slate) tự đặt --focus-ring.
+     Vùng bị cắt (khung cuộn, sát header dính) đặt --focus-offset âm để viền vẽ vào trong. */
   :focus-visible {
     outline: 2px solid var(--focus-ring, var(--accent-fg));
-    outline-offset: 2px;
+    outline-offset: var(--focus-offset, 2px);
   }
 }
 

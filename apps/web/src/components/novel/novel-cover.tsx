@@ -31,7 +31,7 @@ export function NovelCover({
   return (
     <div
       className={cn(
-        "relative aspect-[2/3] w-full overflow-hidden rounded-cover bg-surface shadow-[0_8px_20px_rgba(0,0,0,0.28)] ring-1 ring-line/60",
+        "relative aspect-[2/3] w-full overflow-hidden rounded-cover bg-subtle shadow-sm ring-1 ring-line/60",
         className
       )}>
       {uri ? (
@@ -50,7 +50,7 @@ export function NovelCover({
           className="flex h-full w-full items-end bg-gradient-to-b from-white/5 to-black/40 p-2"
           style={{ backgroundColor: color ?? colorFor(seed) }}>
           {/* Nền fallback luôn tối nên chữ cố định màu sáng, không theo theme. */}
-          <span className="line-clamp-3 font-serif text-[13px] leading-tight font-semibold text-[#f4efe6]">
+          <span className="line-clamp-3 font-heading text-[13px] leading-tight font-semibold text-[#f4efe6]">
             {title}
           </span>
         </div>

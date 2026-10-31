@@ -3,14 +3,16 @@ import Link from "next/link";
 
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "primary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "ghost";
 
 const BASE =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold leading-none transition-[filter,background-color,border-color,color] disabled:opacity-60";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-control px-5 text-sm font-semibold leading-none transition-[background-color,border-color,color] disabled:opacity-60";
 
 const VARIANTS: Record<ButtonVariant, string> = {
   /** Màu nhấn duy nhất của app — chỉ cho hành động chính của màn hình. */
-  primary: "bg-accent text-on-accent hover:brightness-105",
+  primary: "bg-accent text-on-accent hover:bg-accent-hover",
+  /** Nút xám đi kèm nút chính ("DS.Chương", "‹ Trước"). */
+  secondary: "bg-hover text-fg hover:bg-line",
   ghost: "border border-line-strong bg-surface text-fg hover:bg-hover",
 };
 
