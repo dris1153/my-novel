@@ -1,7 +1,7 @@
 ---
 phase: 8
 title: "Art thủy mặc AI"
-status: blocked
+status: completed
 priority: P2
 effort: "4h"
 dependencies: [1]
