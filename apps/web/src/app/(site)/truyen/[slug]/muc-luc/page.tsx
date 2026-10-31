@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { ChapterListSkeleton } from "@/components/novel/chapter-list-skeleton";
-import { PageCrumbs } from "@/components/ui/page-nav";
+import { TocHeader } from "@/components/novel/toc-header";
 import { TocList } from "@/components/novel/toc-list";
 import { fetchNovel } from "@/lib/queries";
 
@@ -24,17 +24,8 @@ export default async function TocPage({ params }: PageProps<"/truyen/[slug]/muc-
   if (!novel) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-6 pt-10">
-      <PageCrumbs
-        items={[
-          { href: "/", label: "Trang chủ" },
-          { href: `/truyen/${novel.slug}`, label: novel.title },
-          { label: "Mục lục" },
-        ]}
-      />
-      <h1 className="font-serif text-[32px] leading-[1.12] text-ink">
-        Mục lục <span className="text-ink-3">— {novel.title}</span>
-      </h1>
+    <main className="mx-auto w-full max-w-[900px] px-4 pt-4 lg:pt-8">
+      <TocHeader novel={novel} page={1} />
       <Suspense fallback={<ChapterListSkeleton rows={12} />}>
         <TocList slug={novel.slug} page={1} />
       </Suspense>

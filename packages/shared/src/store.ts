@@ -11,6 +11,8 @@ export type NovelMeta = {
   status: StoredNovelStatus;
   genres: string[];
   cover: 'cover.jpg' | null;
+  /** Màu chủ đạo của bìa (hex, đã kẹp độ sáng) — tô nền header. Thiếu ở dữ liệu cũ. */
+  coverColor?: string | null;
   featured: boolean;
   sourceUrl: string | null;
   createdAt: string;
@@ -21,7 +23,7 @@ export type ChapterEntry = { n: number; title: string };
 
 export type IndexNovel = Pick<
   NovelMeta,
-  'slug' | 'title' | 'author' | 'status' | 'genres' | 'cover' | 'featured' | 'updatedAt'
+  'slug' | 'title' | 'author' | 'status' | 'genres' | 'cover' | 'coverColor' | 'featured' | 'updatedAt'
 > & { chapterCount: number };
 
 export type StoreGenre = { slug: string; name: string };
@@ -38,6 +40,8 @@ export type ProgressEntry = { chapter: number; scroll: number; updatedAt: string
 export type UserState = {
   library: { slug: string; addedAt: string }[];
   progress: Record<string, ProgressEntry>;
+  /** Số chương lúc người dùng đọc/theo dõi gần nhất — badge "+N chương mới". Thiếu ở state cũ. */
+  seen?: Record<string, number>;
 };
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;

@@ -3,113 +3,107 @@
 /* next-themes gắn class `dark` lên <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Token thô ──────────────────────────────────────────────────────────
-   Light là nguồn chân lý (DESIGN.md). Dark suy ra từ đó: giữ đúng "chất"
-   nhưng nâng độ sáng của mực để đạt AA trên nền #141210. */
+/* ── Token "Thư viện đêm" ───────────────────────────────────────────────
+   Dark là mặc định (ThemeProvider), light là biến thể. Thang xám theo Radix slate.
+   Mọi cặp chữ/nền phải ≥4.5:1 — src/lib/contrast.test.ts đọc thẳng file này. */
 :root {
-  --paper: #fffdf8;
-  --halo: #f9f9f9;
-  --ink: #0a0a0a;
-  --ink-2: #474747;
-  --ink-3: #8c8c8c;
-  --line: #e5e5e5;
-  --ash: #d1d1d1;
+  --canvas: #fcfcfd;
+  --subtle: #f9f9fb;
+  --surface: #f0f0f3;
+  --raised: #ffffff;
+  --hover: #e8e8ec;
+  --line: #d9d9e0;
+  --line-strong: #cdced6;
 
-  --sepia: #512906; /* fill CTA */
-  --sepia-text: #512906; /* chữ/link sepia */
-  --on-sepia: #fffdf8;
-  --sepia-soft: #f2ece3;
+  --fg: #1c2024;
+  --fg-2: #60646c;
+  --fg-3: #65696f; /* chữ phụ nhỏ nhất vẫn phải đạt AA */
 
-  --violet: #242d64; /* feature panel — một cái/trang */
-  --on-violet: #fffdf8;
+  --accent: #f2b25c; /* nền nút chính; chữ trên nó là --on-accent */
+  --on-accent: #1a1206;
+  --accent-fg: #8a5200; /* hổ phách làm chữ/link: #f2b25c không đủ tương phản trên nền sáng */
+  --accent-soft: #fbefd9;
 
-  --forest: #0c3b1a;
-  --forest-soft: #eaf0ea;
-  --oxblood: #5e0831;
-  --margin: #ffc934; /* chỉ làm wash sau doodle */
+  --ink-art: #1c2024; /* màu tô mask minh hoạ thủy mặc */
+
+  /* Độ đậm màu bìa ở tâm gradient. Light phải nhạt hơn nhiều: màu bìa đã kẹp tối nên
+     đậm quá sẽ làm nền dưới chữ tối kém tương phản (src/lib/tint.test.ts). */
+  --tint-card: 12%;
+  --tint-hero: 25%;
 }
 
 html.dark {
-  --paper: #141210;
-  --halo: #1c1917;
-  --ink: #f3ede2;
-  --ink-2: #b3aaa0;
-  --ink-3: #8a8177; /* sáng hơn "smoke" để chữ phụ đạt AA trên nền tối */
-  --line: #2e2a26;
-  --ash: #3a352f;
+  --canvas: #111113;
+  --subtle: #18191b;
+  --surface: #212225;
+  --raised: #272a2d;
+  --hover: #2e3135;
+  --line: #2e3135;
+  --line-strong: #43484e;
 
-  --sepia: #a1572e; /* nâng sáng để nổi trên nền tối */
-  --sepia-text: #d99a6c;
-  --on-sepia: #fffdf8;
-  --sepia-soft: #2a1d14;
+  --fg: #edeef0;
+  --fg-2: #b0b4ba;
+  --fg-3: #9a9ea6;
 
-  --violet: #2b356f;
-  --on-violet: #fffdf8;
+  --accent: #f2b25c;
+  --on-accent: #1a1206;
+  --accent-fg: #f2b25c;
+  --accent-soft: #2a2116;
 
-  --forest: #8fd0a3;
-  --forest-soft: #16281c;
-  --oxblood: #e0a1bb;
-  --margin: #ffc934;
+  --ink-art: #edeef0;
+
+  --tint-card: 50%;
+  --tint-hero: 75%;
 }
 
 /* ── Map sang utility Tailwind ──────────────────────────────────────────
    `inline` là bắt buộc: nếu không, Tailwind chốt giá trị ở :root và
    override của `.dark` sẽ không tới được utility. */
 @theme inline {
-  --color-paper: var(--paper);
-  --color-halo: var(--halo);
-  --color-ink: var(--ink);
-  --color-ink-2: var(--ink-2);
-  --color-ink-3: var(--ink-3);
+  --color-canvas: var(--canvas);
+  --color-subtle: var(--subtle);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-hover: var(--hover);
   --color-line: var(--line);
-  --color-ash: var(--ash);
-  --color-sepia: var(--sepia);
-  --color-sepia-text: var(--sepia-text);
-  --color-on-sepia: var(--on-sepia);
-  --color-sepia-soft: var(--sepia-soft);
-  --color-violet: var(--violet);
-  --color-on-violet: var(--on-violet);
-  --color-forest: var(--forest);
-  --color-forest-soft: var(--forest-soft);
-  --color-oxblood: var(--oxblood);
-  --color-margin: var(--margin);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-ink-art: var(--ink-art);
 
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --font-serif: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-be-vietnam), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-noto-serif), Georgia, "Times New Roman", serif;
   --font-read: var(--font-literata), Georgia, "Times New Roman", serif;
 
-  /* Một radius duy nhất cho chrome — DESIGN.md: "Keep all radii at 10px". */
-  --radius-lg: 10px;
-
-  --text-caption: 14px;
-  --text-caption--line-height: 1.43;
-  --text-body: 16px;
-  --text-body--line-height: 1.5;
-  --text-subheading: 20px;
-  --text-subheading--line-height: 1.5;
-  --text-heading-sm: 32px;
-  --text-heading-sm--line-height: 1.12;
-  --text-heading: 42px;
-  --text-heading--line-height: 1.1;
-  --text-display: 48px;
-  --text-display--line-height: 1.08;
+  --radius-cover: 6px;
+  --radius-card: 14px;
+  --radius-sheet: 22px;
 }
 
 body {
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--canvas);
+  color: var(--fg);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: var(--margin);
-  color: var(--ink);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
-:focus-visible {
-  outline: 2px solid var(--sepia);
-  outline-offset: 2px;
+/* Trong @layer base để utility (vd `outline-none` của ô nhập đã có viền focus riêng) ghi đè được. */
+@layer base {
+  /* accent-fg chứ không phải accent: hổ phách sáng chỉ đạt ~1.8:1 trên nền light. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring, var(--accent-fg));
+    outline-offset: 2px;
+  }
 }
 
 /* Tailwind v4 Preflight bỏ cursor:pointer mặc định của button. */
@@ -134,14 +128,8 @@ body {
    ══════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* accordion (21) */
-  --acc-expand: 250ms;
-  --acc-collapse: 250ms;
-  --acc-chevron: 250ms;
-  --acc-ease: cubic-bezier(0.22, 1, 0.36, 1);
-
-  /* like button (23) — màu tim là oxblood, không dùng hot pink ngoài palette */
-  --like-color: #5e0831;
+  /* like button (23) — tim dùng màu nhấn, không thêm màu ngoài palette */
+  --like-color: var(--accent-fg);
   --like-fill: 150ms;
   --like-pop: 350ms;
   --like-pop-ease: cubic-bezier(0.34, 1.96, 0.64, 1);
@@ -155,56 +143,6 @@ body {
   --pulse-dur: 1100ms;
   --pulse-count: infinite;
   --pulse-min: 0.45;
-}
-
-html.dark {
-  --like-color: #e0a1bb;
-}
-
-/* ── Accordion expand (21) ───────────────────────────────────────────── */
-.t-acc-panel {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows var(--acc-collapse) var(--acc-ease);
-}
-.t-acc[data-open="true"] .t-acc-panel {
-  grid-template-rows: 1fr;
-  transition: grid-template-rows var(--acc-expand) var(--acc-ease);
-}
-.t-acc-panel-inner {
-  overflow: hidden;
-  opacity: 0;
-  filter: blur(2px);
-  transition:
-    opacity var(--acc-collapse) var(--acc-ease),
-    filter var(--acc-collapse) var(--acc-ease);
-}
-.t-acc[data-open="true"] .t-acc-panel-inner {
-  opacity: 1;
-  filter: blur(0);
-  transition:
-    opacity var(--acc-expand) var(--acc-ease),
-    filter var(--acc-expand) var(--acc-ease);
-}
-.t-acc-chevron {
-  display: inline-flex;
-  transform: scaleY(1);
-  transform-origin: center;
-  transition: transform var(--acc-chevron) var(--acc-ease);
-}
-.t-acc-chevron path {
-  vector-effect: non-scaling-stroke;
-}
-.t-acc[data-open="true"] .t-acc-chevron {
-  transform: scaleY(-1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .t-acc-panel,
-  .t-acc-panel-inner,
-  .t-acc-chevron {
-    transition: none !important;
-  }
 }
 
 /* ── Like button (23) ────────────────────────────────────────────────── */
@@ -301,4 +239,12 @@ html.dark {
   .t-skel-skeleton.is-pulsing > * {
     animation: none !important;
   }
+}
+
+/* Kệ ngang cuộn bằng tay/chạm: ẩn thanh cuộn, vẫn cuộn được. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

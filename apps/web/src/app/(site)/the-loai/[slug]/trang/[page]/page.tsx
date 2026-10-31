@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { GenreChips } from "@/components/novel/genre-chips";
 import { GenreList } from "@/components/novel/genre-list";
 import { NovelGridSkeleton } from "@/components/novel/novel-grid-skeleton";
-import { PageCrumbs } from "@/components/ui/page-nav";
-import { fetchGenre } from "@/lib/queries";
+import { fetchGenre, fetchGenreTiles } from "@/lib/queries";
 
 export const revalidate = 600;
 
@@ -29,15 +29,17 @@ export default async function GenrePagedPage({ params }: PageProps<"/the-loai/[s
   const current = readPage(page);
   if (current === null) notFound();
 
-  const genre = await fetchGenre(slug);
+  const [genre, tiles] = await Promise.all([fetchGenre(slug), fetchGenreTiles()]);
   if (!genre) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-6 pt-10">
-      <PageCrumbs items={[{ href: "/the-loai", label: "Thể loại" }, { label: genre.name }]} />
-      <h1 className="font-serif text-[32px] leading-[1.12] text-ink">
-        {genre.name} <span className="text-ink-3">— trang {current}</span>
+    <main className="mx-auto w-full max-w-[1200px] px-4 pt-6 lg:px-6 lg:pt-10">
+      <h1 className="font-serif text-2xl font-bold text-fg lg:text-3xl">
+        {genre.name} <span className="text-fg-2">· trang {current}</span>
       </h1>
+      <div className="mt-4">
+        <GenreChips genres={tiles.filter((tile) => tile.count > 0)} activeSlug={genre.slug} />
+      </div>
       <Suspense fallback={<NovelGridSkeleton />}>
         <GenreList slug={genre.slug} page={current} />
       </Suspense>

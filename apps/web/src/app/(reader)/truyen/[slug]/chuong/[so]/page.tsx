@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { ReaderShell } from "@/components/reader/reader-shell";
+import { chapterLabel } from "@/lib/chapter-title";
 import { fetchChapter } from "@/lib/queries";
 import { readMyStateOrEmpty } from "@/lib/state-store";
 
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: PageProps<"/truyen/[slug]/chu
   const data = await fetchChapter(slug, number);
   if (!data) return { title: "Không tìm thấy chương" };
 
-  const title = `Chương ${number}: ${data.chapter.title}`;
+  const title = chapterLabel(number, data.chapter.title);
   const description = data.chapter.content.slice(0, 160);
 
   return {
@@ -54,6 +55,7 @@ export default async function ChapterPage({ params }: PageProps<"/truyen/[slug]/
         total={data.total}
         prevNumber={data.prevNumber}
         nextNumber={data.nextNumber}
+        nextTitle={data.nextTitle}
         initialScroll={resumed ? saved.scroll : 0}
         alreadySaved={resumed}>
         {paragraphs.map((paragraph, index) => (

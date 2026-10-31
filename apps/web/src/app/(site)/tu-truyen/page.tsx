@@ -1,7 +1,10 @@
-import { DoodleBook } from "@/components/doodles";
-import { NovelGridCard } from "@/components/novel/novel-card";
-import { ButtonLink } from "@/components/ui/button";
-import { fetchNovelCards } from "@/lib/queries";
+import Link from "next/link";
+
+import { LibraryRow } from "@/components/novel/library-row";
+import { EmptyState } from "@/components/ui/empty-state";
+import { cn } from "@/lib/cn";
+import { followingRows, readingRows } from "@/lib/library-rows";
+import { fetchAllNovelCards } from "@/lib/queries";
 import { readMyState } from "@/lib/state-store";
 
 export const metadata = {
@@ -9,31 +12,59 @@ export const metadata = {
   robots: { index: false, follow: true },
 };
 
-export default async function LibraryPage() {
-  const { library } = await readMyState();
-  const novels = await fetchNovelCards(library.map((e) => e.slug));
+type Tab = "dang-doc" | "theo-doi";
+
+export default async function LibraryPage({ searchParams }: PageProps<"/tu-truyen">) {
+  // Lỗi đọc state ở đây phải hiện ra: tủ truyện rỗng trông như mất dữ liệu.
+  const [state, cards, sp] = await Promise.all([readMyState(), fetchAllNovelCards(), searchParams]);
+  const reading = readingRows(cards, state);
+  const following = followingRows(cards, state);
+
+  const requested = sp.tab === "theo-doi" || sp.tab === "dang-doc" ? (sp.tab as Tab) : null;
+  const tab: Tab = requested ?? (reading.length > 0 ? "dang-doc" : "theo-doi");
+  const rows = tab === "dang-doc" ? reading : following;
+
+  const tabs: { key: Tab; label: string; count: number }[] = [
+    { key: "dang-doc", label: "Đang đọc", count: reading.length },
+    { key: "theo-doi", label: "Theo dõi", count: following.length },
+  ];
 
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-6 pt-10">
-      <h1 className="font-serif text-[32px] leading-[1.12] text-ink">Tủ truyện</h1>
+    <main className="mx-auto w-full max-w-[760px] px-4 pt-6 lg:pt-10">
+      <h1 className="font-serif text-2xl font-bold text-fg lg:text-3xl">Tủ truyện</h1>
 
-      {novels.length === 0 ? (
-        <div className="mt-16 flex flex-col items-center text-center">
-          <DoodleBook size={88} rotate={-6} wash />
-          <p className="mt-6 text-sm text-ink-2">Chưa có truyện nào trong tủ.</p>
-          <p className="mt-1 text-sm text-ink-3">Bấm ♡ ở trang truyện để lưu lại.</p>
-          <div className="mt-6">
-            <ButtonLink variant="ghost" href="/">
-              Khám phá truyện
-            </ButtonLink>
-          </div>
-        </div>
+      <nav aria-label="Lọc tủ truyện" className="mt-4 flex gap-2">
+        {tabs.map(({ key, label, count }) => (
+          <Link
+            key={key}
+            href={`/tu-truyen?tab=${key}`}
+            aria-current={tab === key ? "page" : undefined}
+            className={cn(
+              "inline-flex min-h-11 items-center rounded-full px-4 text-sm transition-colors",
+              tab === key ? "bg-fg font-semibold text-canvas" : "bg-surface text-fg-2 hover:text-fg"
+            )}>
+            {label} · {count}
+          </Link>
+        ))}
+      </nav>
+
+      {rows.length === 0 ? (
+        <EmptyState
+          art="empty-library"
+          title={tab === "dang-doc" ? "Chưa đọc truyện nào" : "Tủ truyện còn trống"}
+          description={
+            tab === "dang-doc"
+              ? "Mở một chương bất kỳ, tiến độ sẽ hiện ở đây."
+              : "Bấm ♡ ở trang truyện để theo dõi và nhận số chương mới."
+          }
+          action={{ href: "/", label: "Khám phá truyện" }}
+        />
       ) : (
-        <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-6">
-          {novels.map((novel) => (
-            <NovelGridCard key={novel.slug} novel={novel} />
+        <ul className="mt-2">
+          {rows.map((row) => (
+            <LibraryRow key={row.novel.slug} row={row} />
           ))}
-        </div>
+        </ul>
       )}
     </main>
   );

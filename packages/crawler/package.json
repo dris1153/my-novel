@@ -6,7 +6,8 @@
   "scripts": {
     "crawl": "tsx src/cli.ts",
     "test": "node --test src/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "backfill:colors": "tsx src/backfill-cover-color.ts"
   },
   "dependencies": {
     "node-html-parser": "^9.0.1",

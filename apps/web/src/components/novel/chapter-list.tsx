@@ -1,47 +1,75 @@
 import Link from "next/link";
 
+import { cn } from "@/lib/cn";
 import type { ChapterListItem } from "@/lib/queries";
 
-/** Danh sách chương (mới nhất trước) — 50 dòng đầu ở trang chi tiết. */
+/** Một dòng chương: số + tên; chương đang đọc làm nổi, chương đã qua mờ đi. */
+function ChapterRow({
+  slug,
+  chapter,
+  current,
+}: {
+  slug: string;
+  chapter: ChapterListItem;
+  current: number | null;
+}) {
+  const reading = chapter.number === current;
+  const read = current !== null && chapter.number < current;
+
+  return (
+    <li className="border-b border-line">
+      <Link
+        href={`/truyen/${slug}/chuong/${chapter.number}`}
+        aria-current={reading ? "true" : undefined}
+        className={cn(
+          "group -mx-2 flex min-h-12 items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-hover",
+          reading && "bg-surface"
+        )}>
+        <span className={cn("w-12 shrink-0 text-xs tabular-nums", read ? "text-fg-3" : "text-fg-2")}>
+          {chapter.number}
+        </span>
+        <span className={cn("min-w-0 flex-1 truncate text-sm", read ? "text-fg-3" : "text-fg")}>
+          {chapter.title || `Chương ${chapter.number}`}
+        </span>
+        {reading && <span className="shrink-0 text-xs font-semibold text-accent-fg">Đang đọc</span>}
+      </Link>
+    </li>
+  );
+}
+
+/** Vài chương mới nhất ở trang chi tiết. */
 export function ChapterList({
   slug,
   chapters,
+  current = null,
 }: {
   slug: string;
   chapters: ChapterListItem[];
+  current?: number | null;
 }) {
   return (
-    <ol className="border-t border-line">
+    <ol>
       {chapters.map((chapter) => (
-        <li key={chapter.number} className="border-b border-line">
-          <Link
-            href={`/truyen/${slug}/chuong/${chapter.number}`}
-            className="group flex items-baseline justify-between gap-4 py-3">
-            <span className="truncate text-sm text-ink transition-colors group-hover:text-sepia-text">
-              Chương {chapter.number} — {chapter.title}
-            </span>
-          </Link>
-        </li>
+        <ChapterRow key={chapter.number} slug={slug} chapter={chapter} current={current} />
       ))}
     </ol>
   );
 }
 
-/** Mục lục đầy đủ — hai cột, thứ tự đọc (tăng dần). */
-export function ChapterToc({ slug, chapters }: { slug: string; chapters: ChapterListItem[] }) {
+/** Mục lục đầy đủ — hai cột trên màn rộng, thứ tự đọc (tăng dần). */
+export function ChapterToc({
+  slug,
+  chapters,
+  current = null,
+}: {
+  slug: string;
+  chapters: ChapterListItem[];
+  current?: number | null;
+}) {
   return (
-    <ol className="mt-6 grid border-t border-line sm:grid-cols-2 sm:gap-x-8">
+    <ol className="mt-4 grid sm:grid-cols-2 sm:gap-x-8">
       {chapters.map((chapter) => (
-        <li key={chapter.number} className="border-b border-line">
-          <Link
-            href={`/truyen/${slug}/chuong/${chapter.number}`}
-            className="group flex items-baseline gap-2 py-2.5">
-            <span className="shrink-0 text-xs text-ink-3">{chapter.number}.</span>
-            <span className="truncate text-sm text-ink transition-colors group-hover:text-sepia-text">
-              {chapter.title}
-            </span>
-          </Link>
-        </li>
+        <ChapterRow key={chapter.number} slug={slug} chapter={chapter} current={current} />
       ))}
     </ol>
   );

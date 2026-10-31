@@ -14,6 +14,7 @@ import {
   type NovelMeta,
 } from 'shared/src/store.ts';
 
+import { clampCoverColor } from './cover-color.ts';
 import { fetchImage } from './fetch.ts';
 
 const COVER_MAX_SIDE = 600;
@@ -53,6 +54,8 @@ export function knownGenreSlugs(dir: string): Set<string> {
 export type MetaInput = Pick<NovelMeta, 'slug' | 'title' | 'author' | 'description' | 'status' | 'genres'> & {
   sourceUrl: string;
   hasNewCover: boolean;
+  /** Màu của bìa mới (chỉ dùng khi hasNewCover). */
+  coverColor?: string | null;
 };
 
 /**
@@ -72,6 +75,7 @@ export function upsertNovelMeta(dir: string, input: MetaInput, now = new Date().
     status: input.status,
     genres: input.genres,
     cover: input.hasNewCover ? 'cover.jpg' : (old?.cover ?? null),
+    coverColor: input.hasNewCover ? (input.coverColor ?? null) : (old?.coverColor ?? null),
     featured: old?.featured ?? false,
     sourceUrl: input.sourceUrl,
     createdAt: old?.createdAt ?? now,
@@ -87,13 +91,22 @@ export function touchNovel(dir: string, slug: string, now = new Date().toISOStri
   if (meta) writeJson(dir, metaPath(slug), { ...meta, updatedAt: now });
 }
 
-/** Tải bìa, nén về jpeg ≤100KB. Lỗi → false, không chặn job. */
-export async function writeCover(dir: string, slug: string, sourceUrl: string | null): Promise<boolean> {
-  if (!sourceUrl) return false;
+/** Màu chủ đạo của ảnh (thu nhỏ trước cho rẻ), đã kẹp độ sáng. */
+export async function coverColorOf(image: Buffer): Promise<string> {
+  const { dominant } = await sharp(image).resize(64, 64, { fit: 'cover' }).stats();
+  return clampCoverColor(dominant);
+}
+
+export type CoverResult = { written: boolean; color: string | null };
+
+/** Tải bìa, nén về jpeg ≤100KB, tính màu. Lỗi → written=false, không chặn job. */
+export async function writeCover(dir: string, slug: string, sourceUrl: string | null): Promise<CoverResult> {
+  const none: CoverResult = { written: false, color: null };
+  if (!sourceUrl) return none;
   const img = await fetchImage(sourceUrl);
   if (!img) {
     console.warn('  cover tải thất bại, để trống');
-    return false;
+    return none;
   }
   try {
     const resized = sharp(img.buffer).resize(COVER_MAX_SIDE, COVER_MAX_SIDE, { fit: 'inside', withoutEnlargement: true });
@@ -102,10 +115,10 @@ export async function writeCover(dir: string, slug: string, sourceUrl: string | 
       buf = await resized.clone().jpeg({ quality: q, mozjpeg: true }).toBuffer();
     }
     writeFile(dir, coverPath(slug), buf);
-    return true;
+    return { written: true, color: await coverColorOf(buf).catch(() => null) };
   } catch (e) {
     console.warn(`  cover xử lý lỗi: ${e instanceof Error ? e.message : e}`);
-    return false;
+    return none;
   }
 }
 

@@ -1,77 +1,44 @@
+import Link from "next/link";
 import { NOVEL_STATUS_LABEL, timeAgo } from "shared";
 
 import { NovelCover } from "./novel-cover";
 
-import { DoodleLantern } from "@/components/doodles";
 import { Tag } from "@/components/ui/tag";
 import type { NovelDetail } from "@/lib/queries";
 
-type Genre = { slug: string; name: string };
-
-/** Hero truyện: panel ink-violet duy nhất của trang. */
-export function NovelHero({
-  novel,
-  chapterTotal,
-  genres,
-}: {
-  novel: NovelDetail;
-  chapterTotal: number;
-  genres: Genre[];
-}) {
+/** Đầu trang truyện: bìa lớn ở giữa, tên serif, thông tin dạng chữ, chip thể loại. */
+export function NovelHero({ novel }: { novel: NovelDetail }) {
   return (
-    <section className="relative overflow-hidden rounded-lg bg-violet p-6 text-on-violet md:p-8">
-      <DoodleLantern
-        size={150}
-        rotate={-10}
-        className="absolute -right-4 -bottom-8 text-[rgba(255,253,248,0.12)] md:right-4 md:bottom-0"
-      />
-
-      <div className="relative flex gap-5 md:gap-7">
-        <div className="w-[104px] shrink-0 md:w-[140px]">
-          <NovelCover
-            uri={novel.coverUrl}
-            title={novel.title}
-            seed={novel.slug}
-            sizes="140px"
-            priority
-            className="border-[rgba(255,253,248,0.2)]"
-          />
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <h1 className="font-serif text-[26px] leading-[1.12] text-on-violet md:text-[36px]">
-            {novel.title}
-          </h1>
-          <p className="mt-2 text-sm opacity-75">{novel.author}</p>
-
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            <Tag className="border-[rgba(255,253,248,0.4)] text-on-violet">
-              {NOVEL_STATUS_LABEL[novel.status]}
-            </Tag>
-            {genres.map((genre) => (
-              <Tag
-                key={genre.slug}
-                className="border-[rgba(255,253,248,0.4)] text-on-violet">
-                {genre.name}
-              </Tag>
-            ))}
-          </div>
-
-          <dl className="mt-5 flex gap-7">
-            <Stat value={String(chapterTotal)} label="Chương" />
-            <Stat value={timeAgo(novel.updatedAt)} label="Cập nhật" />
-          </dl>
-        </div>
+    <section className="flex flex-col items-center text-center">
+      <div className="w-[136px] lg:w-[168px]">
+        <NovelCover
+          uri={novel.coverUrl}
+          title={novel.title}
+          seed={novel.slug}
+          color={novel.coverColor}
+          sizes="168px"
+          priority
+          className="shadow-[0_18px_40px_rgba(0,0,0,0.45)]"
+        />
       </div>
-    </section>
-  );
-}
 
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div>
-      <dd className="font-serif text-[18px] text-on-violet">{value}</dd>
-      <dt className="text-[11px] opacity-70">{label}</dt>
-    </div>
+      <h1 className="mt-5 font-serif text-[22px] leading-tight font-bold text-fg lg:text-3xl">{novel.title}</h1>
+      <p className="mt-1.5 text-sm text-fg-2">{novel.author}</p>
+      <p className="mt-1 text-[13px] text-fg-2">
+        {NOVEL_STATUS_LABEL[novel.status]} · {novel.chapterCount} chương · cập nhật {timeAgo(novel.updatedAt)}
+      </p>
+
+      {novel.genreList.length > 0 && (
+        <ul className="mt-3 flex flex-wrap justify-center gap-x-2">
+          {novel.genreList.map((genre) => (
+            <li key={genre.slug}>
+              <Link href={`/the-loai/${genre.slug}`} className="inline-block py-1.5">
+                <Tag>{genre.name}</Tag>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

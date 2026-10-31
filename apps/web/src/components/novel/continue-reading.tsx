@@ -6,33 +6,44 @@ import { fetchChapterTitle, fetchNovelCards } from "@/lib/queries";
 import { latestProgress } from "@/lib/state-ops";
 import { readMyStateOrEmpty } from "@/lib/state-store";
 
-/** Khối "Đang đọc": truyện có tiến độ mới nhất. Không có (hoặc truyện đã bị xoá) thì ẩn. */
-export async function ContinueReading() {
+/**
+ * Thẻ "Đang đọc": truyện có tiến độ mới nhất, nền nhuộm màu bìa.
+ * Chưa đọc gì (hoặc truyện đã bị xoá) → hiện `fallback` (banner chào ở trang chủ).
+ */
+export async function ContinueReading({ fallback = null }: { fallback?: React.ReactNode }) {
   const latest = latestProgress(await readMyStateOrEmpty());
-  if (!latest) return null;
+  if (!latest) return fallback;
 
   const { slug, entry } = latest;
   const [[novel], title] = await Promise.all([fetchNovelCards([slug]), fetchChapterTitle(slug, entry.chapter)]);
-  if (!novel || title === null) return null;
+  if (!novel || title === null) return fallback;
 
-  const percent = Math.round(Math.min(1, Math.max(0, entry.scroll)) * 100);
+  const percent = Math.round(Math.min(1, entry.chapter / Math.max(1, novel.chapterCount)) * 100);
+  const tint = novel.coverColor ?? "#3b4f6b";
 
   return (
     <Link
       href={`/truyen/${slug}/chuong/${entry.chapter}`}
-      className="flex items-center gap-4 rounded-lg bg-sepia-soft p-4 transition-[filter] hover:brightness-[0.98]">
-      <div className="w-12 shrink-0">
-        <NovelCover uri={novel.coverUrl} title={novel.title} seed={slug} sizes="48px" />
+      className="group flex gap-4 rounded-card border border-line bg-subtle p-4 transition-colors hover:border-line-strong"
+      style={{
+        backgroundImage: `radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, ${tint} var(--tint-card), transparent), transparent 70%)`,
+      }}>
+      <div className="w-[84px] shrink-0">
+        <NovelCover uri={novel.coverUrl} title={novel.title} seed={slug} color={novel.coverColor} sizes="84px" />
       </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] tracking-[0.08em] text-sepia-text uppercase">Đang đọc</p>
-        <p className="truncate font-serif text-[17px] text-ink">{novel.title}</p>
-        <p className="truncate text-xs text-ink-2">
-          Chương {entry.chapter} — {title}
-        </p>
-        <div className="mt-2 h-[3px] w-full overflow-hidden rounded-full bg-line">
-          <div className="h-full rounded-full bg-sepia" style={{ width: `${percent}%` }} />
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <span className="text-[11px] font-semibold tracking-[0.08em] text-accent-fg uppercase">Đang đọc</span>
+        <span className="line-clamp-2 font-serif text-[17px] leading-snug font-semibold text-fg">{novel.title}</span>
+        <span className="line-clamp-1 text-[13px] text-fg-2">
+          Chương {entry.chapter} / {novel.chapterCount}
+          {title && ` · ${title}`}
+        </span>
+        <div className="mt-1 h-[3px] overflow-hidden rounded-full bg-line" aria-hidden>
+          <div className="h-full rounded-full bg-accent" style={{ width: `${percent}%` }} />
         </div>
+        <span className="mt-auto self-start rounded-full bg-accent px-4 py-2 text-sm font-semibold text-on-accent group-hover:brightness-105">
+          Đọc tiếp
+        </span>
       </div>
     </Link>
   );

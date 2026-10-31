@@ -3,18 +3,15 @@ import Link from "next/link";
 
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "primary" | "ghost" | "ghost-light";
+export type ButtonVariant = "primary" | "ghost";
 
 const BASE =
-  "inline-flex items-center justify-center rounded-lg text-sm leading-none transition-[filter,border-color,background-color] disabled:opacity-60";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold leading-none transition-[filter,background-color,border-color,color] disabled:opacity-60";
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  /** CTA duy nhất của brand — sepia đậm lên nhẹ khi hover, không shadow. */
-  primary: "bg-sepia px-4 py-2 text-on-sepia hover:brightness-95",
-  ghost: "border border-ash px-4 py-2 text-ink hover:border-ink",
-  /** Ghost đặt trên panel ink-violet: viền sáng mảnh, chữ ivory. */
-  "ghost-light":
-    "border border-[rgba(255,253,248,0.4)] px-4 py-2 text-on-violet hover:border-[rgba(255,253,248,0.8)]",
+  /** Màu nhấn duy nhất của app — chỉ cho hành động chính của màn hình. */
+  primary: "bg-accent text-on-accent hover:brightness-105",
+  ghost: "border border-line-strong bg-surface text-fg hover:bg-hover",
 };
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant };

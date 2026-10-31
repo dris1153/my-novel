@@ -1,19 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { ReaderSettings } from "./reader-settings";
+import { NextChapterCard } from "./next-chapter-card";
+import { ReaderChrome } from "./reader-chrome";
+import { ReaderSettingsSheet } from "./reader-settings-sheet";
+import { useChromeVisibility } from "./use-chrome-visibility";
 import { useProgressSync } from "./use-progress-sync";
 
-import {
-  READER_LINE_HEIGHT,
-  READER_SIZES,
-  READER_THEMES,
-  READER_WIDTH,
-  useReaderPrefs,
-} from "@/lib/reader";
+import { READER_LINE_HEIGHTS, READER_SIZES, READER_THEMES, READER_WIDTH, useReaderPrefs } from "@/lib/reader";
 
 type Props = {
   novelSlug: string;
@@ -23,6 +19,7 @@ type Props = {
   total: number;
   prevNumber: number | null;
   nextNumber: number | null;
+  nextTitle: string | null;
   /** Vị trí cuộn đã lưu của CHƯƠNG NÀY (0 nếu tiến độ đang ở chương khác). */
   initialScroll: number;
   /** Tiến độ đã trỏ tới chương này rồi, khỏi ghi lại khi mở. */
@@ -38,6 +35,7 @@ export function ReaderShell({
   total,
   prevNumber,
   nextNumber,
+  nextTitle,
   initialScroll,
   alreadySaved,
   children,
@@ -46,155 +44,137 @@ export function ReaderShell({
   const prefs = useReaderPrefs();
   const theme = READER_THEMES[prefs.theme];
   const fontSize = READER_SIZES[prefs.sizeIndex] ?? READER_SIZES[2];
+  const lineHeight = READER_LINE_HEIGHTS[prefs.lineHeight]?.value ?? READER_LINE_HEIGHTS.normal.value;
 
   const [settingsOpen, setSettingsOpen] = useState(false);
-
+  const chrome = useChromeVisibility(chapterNumber);
   useProgressSync({ slug: novelSlug, chapter: chapterNumber, initialScroll, alreadySaved });
 
-  const topbarRef = useRef<HTMLElement | null>(null);
   const fillRef = useRef<HTMLDivElement | null>(null);
+  const percentRef = useRef<HTMLSpanElement | null>(null);
+  const settingsButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  const base = `/truyen/${novelSlug}`;
-  const hasPrev = prevNumber !== null;
-  const hasNext = nextNumber !== null;
-  const prevHref = `${base}/chuong/${prevNumber}`;
-  const nextHref = `${base}/chuong/${nextNumber}`;
+  const novelHref = `/truyen/${novelSlug}`;
+  const prevHref = prevNumber !== null ? `${novelHref}/chuong/${prevNumber}` : null;
+  const nextHref = nextNumber !== null ? `${novelHref}/chuong/${nextNumber}` : null;
 
-  // Cuộn: cập nhật thanh tiến độ + ẩn/hiện topbar (lưu tiến độ ở use-progress-sync).
-  // Ghi thẳng vào DOM để không re-render mỗi frame.
+  // Vạch tiến độ + % chương: ghi thẳng vào DOM để không re-render mỗi frame cuộn.
   useEffect(() => {
-    let lastY = window.scrollY;
-
     const onScroll = () => {
-      const doc = document.documentElement;
-      const scrollable = doc.scrollHeight - window.innerHeight;
-      const y = window.scrollY;
-      const percent = scrollable > 0 ? Math.min(1, Math.max(0, y / scrollable)) : 0;
-
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      const percent = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
       if (fillRef.current) fillRef.current.style.transform = `scaleX(${percent})`;
-
-      if (topbarRef.current) {
-        const hide = y > lastY && y > 160;
-        topbarRef.current.style.transform = hide ? "translateY(-100%)" : "translateY(0)";
-      }
-      lastY = y;
+      if (percentRef.current) percentRef.current.textContent = `${Math.round(percent * 100)}%`;
     };
-
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [chapterNumber]);
 
-  // Điều hướng bằng bàn phím, theo lối đọc trên desktop.
+  // Phím ←/→ chuyển chương, theo lối đọc trên máy tính.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
-      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
-      if (event.key === "ArrowLeft" && hasPrev) router.push(prevHref);
-      if (event.key === "ArrowRight" && hasNext) router.push(nextHref);
+      if (settingsOpen || (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))) return;
+      if (event.key === "ArrowLeft" && prevHref) router.push(prevHref);
+      if (event.key === "ArrowRight" && nextHref) router.push(nextHref);
     };
-
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [hasPrev, hasNext, prevHref, nextHref, router]);
+  }, [prevHref, nextHref, router, settingsOpen]);
+
+  const { pin, toggle } = chrome;
+  const openSettings = useCallback(() => {
+    pin(true);
+    setSettingsOpen(true);
+  }, [pin]);
+  const closeSettings = useCallback(() => {
+    setSettingsOpen(false);
+    pin(false);
+    // Đợi re-render gỡ `inert` khỏi thanh điều khiển rồi mới trả focus về nút "Aa".
+    requestAnimationFrame(() => settingsButtonRef.current?.focus());
+  }, [pin]);
+
+  // Chạm vào thân chữ để bật/tắt thanh điều khiển — trừ khi đang bôi chọn chữ hoặc bấm link/nút.
+  // Chờ một nhịp: nhấn đúp để bôi một từ không được bật/tắt thanh.
+  const tapTimer = useRef<number | null>(null);
+  const onArticleClick = (event: React.MouseEvent) => {
+    if (tapTimer.current !== null) window.clearTimeout(tapTimer.current);
+    tapTimer.current = null;
+    if (event.detail > 1 || window.getSelection()?.toString()) return;
+    if ((event.target as HTMLElement).closest("a, button")) return;
+    tapTimer.current = window.setTimeout(toggle, 220);
+  };
+
+  // Đang focus bằng bàn phím trong thanh điều khiển thì giữ thanh hiện (không tự ẩn khi đang thao tác).
+  const onBlurChrome = (event: React.FocusEvent<HTMLElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) pin(false);
+  };
 
   return (
-    <div className="min-h-dvh" style={{ backgroundColor: theme.bg, color: theme.fg }}>
-      {/* Thanh tiến độ đọc */}
-      <div className="fixed top-0 left-0 z-50 h-[3px] w-full" style={{ backgroundColor: theme.dim, opacity: 0.25 }}>
-        <div
-          ref={fillRef}
-          className="h-full origin-left"
-          style={{ backgroundColor: theme.fg, transform: "scaleX(0)" }}
-        />
+    <div
+      className="min-h-dvh"
+      // Viền focus theo màu chữ của nền đọc: hổ phách không đủ tương phản trên nền Giấy/Ngả vàng.
+      style={{ backgroundColor: theme.bg, color: theme.fg, "--focus-ring": theme.fg } as React.CSSProperties}>
+      <div aria-hidden className="fixed inset-x-0 top-0 z-50 h-[2px]" style={{ backgroundColor: `${theme.dim}40` }}>
+        <div ref={fillRef} className="h-full origin-left bg-accent" style={{ transform: "scaleX(0)" }} />
       </div>
 
-      <header
-        ref={topbarRef}
-        className="sticky top-0 z-40 border-b transition-transform duration-200"
-        style={{ backgroundColor: theme.bg, borderColor: theme.dim, color: theme.dim }}>
-        <div className="mx-auto flex h-14 w-full max-w-[1200px] items-center gap-4 px-5">
-          <Link href={base} className="min-w-0 truncate text-sm hover:underline">
-            ‹ {novelTitle}
-          </Link>
+      {/* Bảng cài đặt mở thì phần còn lại không nhận focus/click (giữ focus trong bảng). */}
+      <div inert={settingsOpen}>
+        <ReaderChrome
+          visible={chrome.visible}
+          theme={theme}
+          novelHref={novelHref}
+          novelTitle={novelTitle}
+          chapterNumber={chapterNumber}
+          total={total}
+          prevHref={prevHref}
+          nextHref={nextHref}
+          percentRef={percentRef}
+          settingsButtonRef={settingsButtonRef}
+          onOpenSettings={openSettings}
+          onFocusChrome={() => pin(true)}
+          onBlurChrome={onBlurChrome}
+        />
 
-          <span className="ml-auto shrink-0 text-xs">
-            Chương {chapterNumber}/{total}
-          </span>
+        <article
+          onClick={onArticleClick}
+          className="mx-auto w-full px-5 pt-20 pb-32"
+          style={{ maxWidth: READER_WIDTH + 40 }}>
+          {chapterTitle ? (
+            <>
+              <p className="font-sans text-xs font-semibold tracking-[0.08em] uppercase" style={{ color: theme.dim }}>
+                Chương {chapterNumber}
+              </p>
+              <h1 className="mt-2 font-read text-[24px] leading-snug font-semibold">{chapterTitle}</h1>
+            </>
+          ) : (
+            <h1 className="font-read text-[24px] leading-snug font-semibold">Chương {chapterNumber}</h1>
+          )}
 
-          <Link href={`${base}/muc-luc`} className="shrink-0 text-sm hover:underline">
-            Mục lục
-          </Link>
+          <div
+            className="mt-7"
+            style={{
+              fontFamily: prefs.serif ? "var(--font-literata)" : "var(--font-be-vietnam)",
+              fontSize,
+              lineHeight,
+            }}>
+            {children}
+          </div>
 
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            aria-label="Tuỳ chỉnh đọc"
-            className="shrink-0 rounded-lg border px-2.5 py-1 text-sm"
-            style={{ borderColor: theme.dim }}>
-            Aa
-          </button>
-        </div>
-      </header>
+          <NextChapterCard
+            theme={theme}
+            chapterNumber={chapterNumber}
+            nextHref={nextHref}
+            nextNumber={nextNumber}
+            nextTitle={nextTitle}
+            novelHref={novelHref}
+          />
+        </article>
+      </div>
 
-      <article className="mx-auto w-full px-5 pt-10 pb-4" style={{ maxWidth: READER_WIDTH + 40 }}>
-        <p className="text-[11px] tracking-[0.08em] uppercase" style={{ color: theme.dim }}>
-          Chương {chapterNumber} / {total}
-        </p>
-        <h1
-          className="mt-2 mb-7 text-[26px] leading-[1.25]"
-          style={{ fontFamily: "var(--font-literata)", fontWeight: 600 }}>
-          {chapterTitle}
-        </h1>
-
-        <div
-          style={{
-            fontFamily: prefs.serif ? "var(--font-literata)" : "var(--font-inter)",
-            fontSize,
-            lineHeight: READER_LINE_HEIGHT,
-          }}>
-          {children}
-        </div>
-      </article>
-
-      <nav
-        className="mx-auto flex w-full gap-3 px-5 pt-8 pb-20"
-        style={{ maxWidth: READER_WIDTH + 40 }}>
-        {hasPrev ? (
-          <ReaderNavLink href={prevHref} theme={theme}>
-            ‹ Chương {chapterNumber - 1}
-          </ReaderNavLink>
-        ) : (
-          <span className="flex-1" />
-        )}
-        {hasNext ? (
-          <ReaderNavLink href={nextHref} theme={theme}>
-            Chương {chapterNumber + 1} ›
-          </ReaderNavLink>
-        ) : (
-          <span className="flex-1" />
-        )}
-      </nav>
-
-      <ReaderSettings open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      {settingsOpen && <ReaderSettingsSheet onClose={closeSettings} />}
     </div>
-  );
-}
-
-function ReaderNavLink({
-  href,
-  theme,
-  children,
-}: {
-  href: string;
-  theme: (typeof READER_THEMES)[keyof typeof READER_THEMES];
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="flex-1 rounded-lg border px-4 py-3 text-center text-sm transition-colors"
-      style={{ borderColor: theme.dim, color: theme.fg }}>
-      {children}
-    </Link>
   );
 }

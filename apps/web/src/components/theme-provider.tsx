@@ -4,12 +4,12 @@ import { ThemeProvider as NextThemes } from "next-themes";
 import type { ReactNode } from "react";
 
 /**
- * `attribute="class"` để khớp `@custom-variant dark` trong globals.css.
+ * `attribute="class"` để khớp `@custom-variant dark` trong globals.css. Mặc định dark (dark-first).
  * `disableTransitionOnChange` tránh nháy transition toàn trang khi đổi theme.
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
-    <NextThemes attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <NextThemes attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
       {children}
     </NextThemes>
   );

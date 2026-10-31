@@ -32,7 +32,7 @@ export async function crawl(listingUrl: string, opts: CrawlOptions = {}): Promis
 
   const slug = slugify(meta.title);
   if (!isSlug(slug)) throw new Error(`Tiêu đề "${meta.title}" không tạo được slug hợp lệ (cần chữ Latin/số).`);
-  const hasNewCover = await writeCover(dir, slug, meta.coverUrl);
+  const cover = await writeCover(dir, slug, meta.coverUrl);
   const known = knownGenreSlugs(dir);
   const genres = meta.genreSlugs.filter((g) => known.has(g));
   const missed = meta.genreSlugs.filter((g) => !known.has(g));
@@ -45,7 +45,8 @@ export async function crawl(listingUrl: string, opts: CrawlOptions = {}): Promis
     status: meta.status,
     genres,
     sourceUrl: listingUrl,
-    hasNewCover,
+    hasNewCover: cover.written,
+    coverColor: cover.color,
   });
   const chapters = new ChapterStore(dir, slug);
 

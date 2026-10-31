@@ -5,7 +5,7 @@ scope: project
 created: 2026-10-30
 source: plans/reports/brainstorm-20261030-github-repo-as-storage.md
 blockedBy: []
-blocks: []
+blocks: [20261031-ui-revamp-thu-vien-dem]
 supersedes: [20261001-local-personal-reader]
 ---
 
