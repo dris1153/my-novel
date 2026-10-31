@@ -27,7 +27,7 @@ export default async function HomePage() {
   const suggested = suggestNovels(all, state);
 
   return (
-    <main className="mx-auto flex w-full max-w-[1320px] flex-col gap-5 px-4 lg:gap-6 lg:px-6">
+    <main className="mx-auto flex w-full max-w-[1860px] flex-col gap-5 px-4 lg:gap-6 lg:px-6">
       <h1 className="sr-only">Trang chủ</h1>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">

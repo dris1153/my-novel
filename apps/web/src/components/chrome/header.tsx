@@ -15,7 +15,7 @@ export async function Header() {
 
   return (
     <header className="sticky top-0 z-30 bg-canvas">
-      <div className="mx-auto flex h-14 w-full max-w-[1320px] items-center gap-3 px-4 lg:h-[72px] lg:px-6">
+      <div className="mx-auto flex h-14 w-full max-w-[1860px] items-center gap-3 px-4 lg:h-[72px] lg:px-6">
         <Link
           href="/"
           className={cn("flex items-center gap-2 font-heading text-xl font-extrabold text-fg", user && "lg:hidden")}>
