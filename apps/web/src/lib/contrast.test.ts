@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 import { contrastRatio as ratio } from "./contrast.ts";
+import { GENRES } from "./genre-info.ts";
 
 // Đọc token thẳng từ globals.css để không có bản sao nào lệch khỏi CSS thật.
 const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
@@ -38,3 +39,14 @@ for (const [name, t] of Object.entries(THEMES)) {
     }
   });
 }
+
+test("chữ trên ô thể loại (mặc định + màu từng tranh) đạt 4.5:1", () => {
+  const t = THEMES.light;
+  const tiles = { mặc_định: t.tile, ...Object.fromEntries(Object.entries(GENRES).map(([slug, g]) => [slug, g.tint])) };
+  for (const [name, bg] of Object.entries(tiles)) {
+    for (const fg of ["on-tile", "on-tile-2"]) {
+      const r = ratio(t[fg], bg);
+      assert.ok(r >= 4.5, `${name}: ${fg} ${t[fg]} trên ${bg} = ${r.toFixed(2)}`);
+    }
+  }
+});

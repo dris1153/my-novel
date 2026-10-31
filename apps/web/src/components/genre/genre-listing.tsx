@@ -17,7 +17,7 @@ export async function GenreListing({ slug, page }: { slug: string; page: number 
   if (!genre || (page > 1 && (page - 1) * PAGE_SIZE >= genre.count)) notFound();
 
   return (
-    <main className="mx-auto flex w-full max-w-[1320px] flex-col gap-5 px-4 lg:px-6">
+    <main className="mx-auto flex w-full max-w-[1860px] flex-col gap-5 px-4 lg:px-6">
       <GenreHeader slug={genre.slug} name={genre.name} count={genre.count} page={page} />
       <GenreChips genres={tiles.filter((tile) => tile.count > 0)} activeSlug={genre.slug} />
       <Suspense fallback={<NovelGridSkeleton />}>

@@ -37,6 +37,11 @@
   --tint-lavender: #e2dffe;
   --tint-peach: #feedd7;
   --tint-sky: #d8e4fe;
+
+  /* Ô thể loại giữ pastel ở cả 2 theme như tranh; mỗi ô ghi đè --tile bằng màu tranh của nó. */
+  --tile: #e2dffe;
+  --on-tile: #292942;
+  --on-tile-2: #54526a;
 }
 
 html.dark {
@@ -98,6 +103,9 @@ html.dark {
   --color-tint-lavender: var(--tint-lavender);
   --color-tint-peach: var(--tint-peach);
   --color-tint-sky: var(--tint-sky);
+  --color-tile: var(--tile);
+  --color-on-tile: var(--on-tile);
+  --color-on-tile-2: var(--on-tile-2);
 
   --font-sans: var(--font-nunito), system-ui, -apple-system, sans-serif;
   --font-heading: var(--font-nunito), system-ui, -apple-system, sans-serif;

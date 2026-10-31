@@ -21,7 +21,7 @@ export default async function ListPagedPage({ params }: PageProps<"/danh-sach/[k
   if (!list || current === null) notFound();
 
   return (
-    <main className="mx-auto flex w-full max-w-[1320px] flex-col gap-4 px-4 lg:px-6">
+    <main className="mx-auto flex w-full max-w-[1860px] flex-col gap-4 px-4 lg:px-6">
       <h1 className="border-l-4 border-accent pl-3 font-heading text-2xl font-bold text-fg lg:text-3xl">
         {list.title} <span className="text-fg-2">· trang {current}</span>
       </h1>

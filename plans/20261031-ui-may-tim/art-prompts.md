@@ -56,3 +56,10 @@ Mascot, kết thúc chung: *"Single isolated character, centered, nothing touchi
 | tam-ly | 01a19141-4643-7598-a219-695deb00fef5 | cream-yellow | open book and coffee on a sill, autumn leaves |
 | gia-dinh | 01a19141-489a-741c-9dde-37de03d87b7a | mint-green | family house with garden and blossom trees |
 | lich-su | 01a19141-4aee-757b-b610-2ad93d3ab543 | coral-red | red palace pagoda, maple leaves |
+
+## Vòng 3: đầu trang `/the-loai` (2026-10-31)
+
+- Meshy hết credit → gọi thẳng OpenAI `POST /v1/images/edits`, model `gpt-image-2.5-sunburst`, `size 1536x1024`, `quality high`, 1 lần sinh (key `OPENAI_API_KEY` ở máy dev, không nằm trong repo).
+- Tham chiếu (`image[]`): vùng tranh bên phải đầu trang trong `mockup-the-loai.png` (x 860, y 100, 645×238) và `public/art/mascot-cat.webp` dán lên nền `#00D060`.
+- Cắt nền `art-cut-background.mjs`, rồi `… cat-books.webp 900 "" 82` (900×577, 58 KB).
+- Prompt: *"Recreate the illustration of the first reference image as one isolated sticker group, in the exact style of the cat in the second reference image (same calico cat character: white fur with orange and dark brown patches, solid continuous brown outline, soft cel shading, pastel colors). The cat lies sprawled on top of a stack of three thick closed hardcover books, front paws draped over the top book, eyes happily closed, rosy cheeks, smiling, tail curling down beside the books. Books: soft blue and lavender covers with cream page edges and a small white paw-print emblem; no text or letters anywhere. A fluffy white cloud with lavender shading under the books, two small yellow four-point sparkle stars and two short yellow accent strokes near the cat's head. Wide landscape composition, the whole group centered and filling about 80% of the width, nothing touching the image borders. No plants, nothing green in the artwork. The entire background is one perfectly flat solid chroma-key green color #00D060 with no gradient, no shadow, no glow and no texture."*

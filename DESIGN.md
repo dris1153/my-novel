@@ -30,6 +30,7 @@ Source of truth for values is `apps/web/src/app/globals.css` (app) and `apps/web
 | `accent-fg` / `accent-soft` | `#3032d8` / `#eae6ff` | `#b4b5ff` / `#2a2850` | indigo as text / active pill, avatar |
 | `ink` / `on-ink` | `#292942` / `#ffffff` | `#f1eff8` / `#16151f` | strong pill on art or tint |
 | `tint-lavender` / `tint-peach` / `tint-sky` | `#e2dffe` / `#feedd7` / `#d8e4fe` | `#2a2850` / `#3a2e22` / `#22304a` | pastel cards |
+| `tile` / `on-tile` / `on-tile-2` | `#e2dffe` / `#292942` / `#54526a` | same (no dark override) | genre cards stay pastel in both themes; each card sets `--tile` to its genre tint from `lib/genre-info.ts` |
 | `hot-fg` | `#b4235a` | `#ff9db0` | chapter counts on pages not yet revamped |
 | `bar` / `on-bar` | `#292942` / `#ffffff` | `#2c2b3c` / `#f1eff8` | reader top bar |
 
@@ -47,7 +48,7 @@ Both via `next/font/google` with `subsets: ["latin", "vietnamese"]`. Home block 
 ## Shape & spacing
 
 - Radius: card `24px` (`rounded-card`), cover `14px` (`rounded-cover`), controls full (`rounded-control`), sheet top `16px`.
-- Page gutter 16px mobile / 24px desktop; home max 1320px.
+- Page gutter 16px mobile / 24px desktop; content max 1860px.
 - Touch targets ≥44px (`min-h-11`). Carousel dots are 24px (WCAG 2.5.8 minimum) — swiping is the main control.
 
 ## Layout & navigation
@@ -72,7 +73,7 @@ Reading progress beyond the novel's chapter count (novel re-crawled shorter) is 
 
 ## Thể loại
 
-- **`/the-loai`:** lavender header card (title, subtitle, cat reading) + grid of genre cards (2 / 3 / 4 / 5 columns). Each card: the genre's own illustration, name + novel count on a bottom `surface` scrim, two real covers fanned in the corner (≥640px). Genres with novels first.
+- **`/the-loai`:** lavender header card (title, subtitle, cat asleep on a stack of books) + grid of genre cards (2 / 3 / 4 / 5 columns). Each card is a pastel tile in its genre's tint (sampled from the art's bottom edge, same in both themes): the illustration on top fading into the tint, name + novel count in `on-tile`, up to two real covers fanned in the bottom-right corner. Text and covers are sized in `cqw` so the card keeps its proportions at every column count. Genres with novels first.
 - **`/the-loai/[slug]`:** header card with the genre illustration on the right behind a left-to-right `canvas` scrim, breadcrumb pill "Thể loại ›", name, count, one-line tagline (`lib/genre-info.ts`; a genre without art/tagline falls back to the plain sky tint), cat mascot (≥1024px). Then genre chips (lavender pills, active = accent) and the cover-card grid with centred pagination.
 - **Cover-card grid** (`NovelGrid`, also used by danh sách and tìm kiếm): each novel is a white card (cover, bold title, author), 2 / 3 / 4 / 5 / 6 columns.
 
@@ -93,6 +94,7 @@ Soft pastel anime illustrations generated with Meshy `gpt-image-2-5-sunburst`, r
 
 - `public/art/hero-1..3.webp` (16:9, left side kept pale for the title),
 - `public/art/{mascot-cat,cat-reading,boy-cat,logo-book}.webp` (transparent),
+- `public/art/cat-books.webp` (transparent, `/the-loai` header; OpenAI `gpt-image-2.5-sunburst` because Meshy credit ran out),
 - `public/art/genres/<slug>.webp` (1200×800, page header) and `<slug>-sm.webp` (600×400, card) for the 10 genres,
 - older donghua art still used by pages not yet revamped: `sign-in`, `empty-library`, `no-results`, `no-chapters`, `not-found`, `error`.
 
@@ -100,7 +102,7 @@ Rendered with `next/image` + `unoptimized`: `/_next/image` sits behind the login
 
 ## Don'ts
 
-- No raw hex in app chrome (white text on the dark scrim over covers is the one exception).
+- No raw hex in app chrome (exceptions: white text on the dark scrim over covers, and the per-genre tints in `lib/genre-info.ts`, which `contrast.test.ts` checks).
 - No rankings, ratings or fake stats; hide a block rather than fill it.
 - No text on art without a scrim; no titles only in `alt`; no icon-only controls without `aria-label`.
 - Don't put `outline: none` on focusable things without a visible replacement.
