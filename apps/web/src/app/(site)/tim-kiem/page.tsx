@@ -31,7 +31,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/tim-kiem"
     <main className="mx-auto w-full max-w-[1200px] px-4 pt-4 lg:px-6 lg:pt-6">
       <h1 className="sr-only">Tìm kiếm</h1>
 
-      <SearchForm defaultValue={q} autoFocus />
+      <SearchForm defaultValue={q} autoFocus withButton />
 
       {q === "" ? (
         <section className="mt-4 rounded-card bg-surface p-4">

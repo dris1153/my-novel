@@ -3,57 +3,72 @@
 /* next-themes gắn class `dark` lên <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Token "Ngọc Lục" ───────────────────────────────────────────────────
-   Light là mặc định (ThemeProvider): khối trắng (surface) trên nền trang xám (canvas).
-   Dark là tuỳ chọn. Mọi cặp chữ/nền phải ≥4.5:1 — src/lib/contrast.test.ts đọc thẳng file này. */
+/* ── Token "Mây Tím" ────────────────────────────────────────────────────
+   Light là mặc định (ThemeProvider), dark là "tím đêm". Mọi cặp chữ/nền phải ≥4.5:1 —
+   src/lib/contrast.test.ts đọc thẳng file này. */
 :root {
-  --canvas: #f0f2f5;
+  --canvas: #fcf8f8;
   --surface: #ffffff;
-  --subtle: #f7f8fa; /* ô nhập, chip, khung chờ nằm trong khối trắng */
+  --subtle: #f6f2f7; /* ô nhập, chip, khung chờ nằm trong khối trắng */
   --raised: #ffffff;
-  --hover: #eef0f3;
-  --line: #e4e6eb;
-  --line-strong: #cdd0d5;
+  --hover: #f0ebf6;
+  --line: #ece6ef;
+  --line-strong: #d9d2e0;
 
-  --fg: #1c2024;
-  --fg-2: #60646c;
-  --fg-3: #65696f; /* chữ phụ nhỏ nhất vẫn phải đạt AA */
+  --fg: #292942;
+  --fg-2: #54526a;
+  --fg-3: #5a5870; /* chữ phụ nhỏ nhất vẫn phải đạt AA */
 
-  --accent: #15803d; /* nền nút chính; chữ trên nó là --on-accent */
+  --accent: #3b3dfd; /* nền nút chính; chữ trên nó là --on-accent */
   --on-accent: #ffffff;
-  --accent-fg: #166534; /* xanh làm chữ/link: #15803d chỉ ~4.47:1 trên nền trang xám */
-  --accent-soft: #dcfce7;
-  --accent-hover: #166534; /* hover nút chính: làm sáng #15803d sẽ tụt dưới 4.5:1 với chữ trắng */
+  --accent-fg: #3032d8; /* #3b3dfd làm chữ chỉ ~5:1 trên thẻ tím, sát ngưỡng khi lên nền hover */
+  --accent-soft: #eae6ff;
+  --accent-hover: #2f30d0;
 
-  --hot-fg: #b91c1c; /* chỉ cho số chương; #dc2626 trượt AA trên nền xám */
+  --hot-fg: #b4235a; /* chỉ cho số chương */
 
-  --bar: #2f3640; /* thanh nav desktop + thanh trên trình đọc */
+  --bar: #292942; /* thanh trên trình đọc */
   --on-bar: #ffffff;
+
+  --ink: #292942; /* nút tương phản mạnh trên tranh/thẻ pastel; dark đảo sáng để không chìm */
+  --on-ink: #ffffff;
+
+  /* Nền thẻ pastel trên trang chủ. */
+  --tint-lavender: #e2dffe;
+  --tint-peach: #feedd7;
+  --tint-sky: #d8e4fe;
 }
 
 html.dark {
-  --canvas: #111113;
-  --surface: #18191b;
-  --subtle: #212225;
-  --raised: #272a2d;
-  --hover: #2e3135;
-  --line: #2e3135;
-  --line-strong: #43484e;
+  --canvas: #16151f;
+  --surface: #1f1e2b;
+  --subtle: #272636;
+  --raised: #2c2b3c;
+  --hover: #323145;
+  --line: #323145;
+  --line-strong: #4a4860;
 
-  --fg: #edeef0;
-  --fg-2: #b0b4ba;
-  --fg-3: #9a9ea6;
+  --fg: #f1eff8;
+  --fg-2: #c0bdd2;
+  --fg-3: #b0adc4;
 
-  --accent: #22c55e;
-  --on-accent: #052e16;
-  --accent-fg: #4ade80;
-  --accent-soft: #12261a;
-  --accent-hover: #4ade80;
+  --accent: #8b8dff;
+  --on-accent: #14132a;
+  --accent-fg: #b4b5ff;
+  --accent-soft: #2a2850;
+  --accent-hover: #a5a6ff;
 
-  --hot-fg: #f87171;
+  --hot-fg: #ff9db0;
 
-  --bar: #18191b;
-  --on-bar: #edeef0;
+  --bar: #2c2b3c;
+  --on-bar: #f1eff8;
+
+  --ink: #f1eff8;
+  --on-ink: #16151f;
+
+  --tint-lavender: #2a2850;
+  --tint-peach: #3a2e22;
+  --tint-sky: #22304a;
 }
 
 /* ── Map sang utility Tailwind ──────────────────────────────────────────
@@ -78,14 +93,19 @@ html.dark {
   --color-hot-fg: var(--hot-fg);
   --color-bar: var(--bar);
   --color-on-bar: var(--on-bar);
+  --color-ink: var(--ink);
+  --color-on-ink: var(--on-ink);
+  --color-tint-lavender: var(--tint-lavender);
+  --color-tint-peach: var(--tint-peach);
+  --color-tint-sky: var(--tint-sky);
 
-  --font-sans: var(--font-be-vietnam), system-ui, -apple-system, sans-serif;
-  --font-heading: var(--font-roboto-condensed), "Arial Narrow", system-ui, sans-serif;
+  --font-sans: var(--font-nunito), system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-nunito), system-ui, -apple-system, sans-serif;
   --font-read: var(--font-literata), Georgia, "Times New Roman", serif;
 
-  --radius-cover: 4px;
-  --radius-control: 6px;
-  --radius-card: 8px;
+  --radius-cover: 14px;
+  --radius-control: 9999px;
+  --radius-card: 24px;
   --radius-sheet: 16px;
 }
 
@@ -103,7 +123,7 @@ body {
 
 /* Trong @layer base để utility (vd `outline-none` của ô nhập đã có viền focus riêng) ghi đè được. */
 @layer base {
-  /* accent-fg là màu nhấn đã đạt tương phản trên mọi nền; vùng nền tối (thanh slate) tự đặt --focus-ring.
+  /* accent-fg là màu nhấn đã đạt tương phản trên mọi nền; vùng nền tối (nền bar) tự đặt --focus-ring.
      Vùng bị cắt (khung cuộn, sát header dính) đặt --focus-offset âm để viền vẽ vào trong. */
   :focus-visible {
     outline: 2px solid var(--focus-ring, var(--accent-fg));

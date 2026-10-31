@@ -169,11 +169,6 @@ export async function fetchNovelCards(slugs: string[]): Promise<NovelCard[]> {
   });
 }
 
-export async function fetchChapterTitle(slug: string, number: number): Promise<string | null> {
-  if (!isSlug(slug)) return null;
-  return (await getChapters(slug)).find((e) => e.n === number)?.title ?? null;
-}
-
 export type GenreTile = Genre & { count: number; covers: NovelCard[] };
 
 /** Ô thể loại: số truyện + vài bìa thật để ghép — lấy hết từ index.json, không gọi thêm GitHub. */
