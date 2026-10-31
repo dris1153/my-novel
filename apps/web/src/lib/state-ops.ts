@@ -43,12 +43,3 @@ function pruneProgress(progress: Record<string, ProgressEntry>): Record<string, 
   entries.sort((a, b) => b[1].updatedAt.localeCompare(a[1].updatedAt));
   return Object.fromEntries(entries.slice(0, MAX_PROGRESS));
 }
-
-/** Truyện đọc gần nhất — cho khối "Đang đọc". */
-export function latestProgress(state: UserState): { slug: string; entry: ProgressEntry } | null {
-  let best: { slug: string; entry: ProgressEntry } | null = null;
-  for (const [slug, entry] of Object.entries(state.progress)) {
-    if (!best || entry.updatedAt > best.entry.updatedAt) best = { slug, entry };
-  }
-  return best;
-}

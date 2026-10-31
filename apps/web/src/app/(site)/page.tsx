@@ -1,42 +1,42 @@
 import { connection } from "next/server";
 
-import { SearchForm } from "@/components/chrome/search-form";
-import { GenrePanel } from "@/components/home/genre-panel";
-import { HeroCarousel, type HeroSlide } from "@/components/home/hero-carousel";
-import { LatestList } from "@/components/home/latest-list";
-import { ShortcutGrid } from "@/components/home/shortcut-grid";
-import { ContinueReading } from "@/components/novel/continue-reading";
-import { Shelf } from "@/components/novel/shelf";
+import { ContinueList } from "@/components/home/continue-list";
+import { CoverTile } from "@/components/home/cover-tile";
+import { HeroCarousel } from "@/components/home/hero-carousel";
+import { FlameBadge, HomeHeading, StarBadge } from "@/components/home/home-heading";
+import { LibraryCard } from "@/components/home/library-card";
+import { PromoCard } from "@/components/home/promo-card";
+import { ReadingCard } from "@/components/home/reading-card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { fetchAllNovelCards, fetchGenreTiles } from "@/lib/queries";
+import { cn } from "@/lib/cn";
+import { followingRows, readingRows } from "@/lib/library-rows";
+import { fetchAllNovelCards } from "@/lib/queries";
+import { readMyStateOrEmpty } from "@/lib/state-store";
+import { suggestNovels } from "@/lib/suggest";
 
-const SHELF_SIZE = 8;
-const LATEST_ROWS = 12;
-const MIN_FOR_SHELF = 4;
-const BANNERS = 4;
+const LATEST_COUNT = 5;
+const MORE_READING = 3;
 
 export default async function HomePage() {
   // Không prerender lúc build (cần GitHub token); khác `force-dynamic` ở chỗ vẫn dùng data cache.
   await connection();
-  const [all, tiles] = await Promise.all([fetchAllNovelCards(), fetchGenreTiles()]);
-  const genreNames = new Map(tiles.map((tile) => [tile.slug, tile.name]));
-  const completed = all.filter((novel) => novel.status === "completed");
-
-  // `featured` bật tay trong repo dữ liệu; chưa có thì lấy truyện mới cập nhật.
-  const featured = all.filter((novel) => novel.featured);
-  const slides: HeroSlide[] = (featured.length > 0 ? featured.slice(0, BANNERS) : all.slice(0, BANNERS)).map((novel, i) => ({
-    slug: novel.slug,
-    title: novel.title,
-    author: novel.author,
-    genre: genreNames.get(novel.genres[0] ?? "") ?? null,
-    coverUrl: novel.coverUrl,
-    coverColor: novel.coverColor,
-    banner: `/art/banner-${(i % BANNERS) + 1}.webp`,
-  }));
+  const [all, state] = await Promise.all([fetchAllNovelCards(), readMyStateOrEmpty()]);
+  // Truyện bị crawl lại ngắn hơn thì tiến độ cũ trỏ tới chương không còn: link sẽ 404, nên không mời đọc tiếp.
+  const [current, ...others] = readingRows(all, state).filter((row) => (row.chapter ?? 0) <= row.novel.chapterCount);
+  const moreReading = others.slice(0, MORE_READING);
+  const suggested = suggestNovels(all, state);
 
   return (
-    <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-4 pt-4 lg:gap-6 lg:px-6 lg:pt-6">
+    <main className="mx-auto flex w-full max-w-[1320px] flex-col gap-5 px-4 lg:gap-6 lg:px-6">
       <h1 className="sr-only">Trang chủ</h1>
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <HeroCarousel />
+        <div className="flex flex-col gap-5 lg:gap-6">
+          <ReadingCard row={current} />
+          <LibraryCard count={followingRows(all, state).length} className="lg:flex-1" />
+        </div>
+      </div>
 
       {all.length === 0 ? (
         <EmptyState
@@ -45,41 +45,49 @@ export default async function HomePage() {
           description="Chạy pnpm crawl <url truyenfull> trên máy để thêm truyện."
         />
       ) : (
-        <>
-          {/* Điện thoại: xếp dọc theo thứ tự DOM. Màn rộng: [thể loại | carousel | đang đọc]; ô tìm + lối tắt ẩn vì header đã có. */}
-          <div className="flex flex-col gap-4 lg:grid lg:auto-cols-[300px] lg:grid-flow-col lg:grid-cols-[220px_minmax(0,1fr)]">
-            <GenrePanel genres={tiles.filter((tile) => tile.count > 0)} className="hidden lg:block lg:h-0 lg:min-h-full" />
-            <HeroCarousel slides={slides} />
-            <SearchForm className="lg:hidden" />
-            <ContinueReading className="lg:self-start" />
-            <ShortcutGrid className="lg:hidden" />
-          </div>
-
-          <div className="lg:hidden">
-            <Shelf
-              title="Truyện mới cập nhật"
-              novels={all.slice(0, SHELF_SIZE)}
-              action={{ href: "/danh-sach/moi-cap-nhat", label: "Thêm →" }}
+        // Dưới xl xếp dọc theo thứ tự DOM (thẻ trang trí cuối); từ xl chia 12 cột, thẻ trang trí lên hàng đầu.
+        // Khối rỗng thì ẩn và khối kia chiếm cả hàng.
+        <div className="grid gap-5 lg:gap-6 xl:grid-cols-12">
+          <section className="min-w-0 xl:col-span-7 xl:row-start-1">
+            <HomeHeading
+              icon={<FlameBadge />}
+              title="Mới cập nhật"
+              action={{ href: "/danh-sach/moi-cap-nhat", label: "Xem thêm →" }}
+              className="mb-2"
             />
-          </div>
-          <LatestList
-            novels={all.slice(0, LATEST_ROWS)}
-            genreNames={genreNames}
-            className="hidden rounded-card bg-surface p-5 lg:block"
-          />
+            <ul className="no-scrollbar -mx-4 -my-1 flex snap-x gap-3 overflow-x-auto px-4 py-1 xl:mx-0 xl:grid xl:grid-cols-5 xl:overflow-visible xl:px-0">
+              {all.slice(0, LATEST_COUNT).map((novel) => (
+                <li key={novel.slug} className="w-[136px] shrink-0 snap-start xl:w-auto">
+                  <CoverTile novel={novel} sizes="(min-width:1280px) 150px, 136px" />
+                </li>
+              ))}
+            </ul>
+          </section>
 
-          <p className="flex items-center gap-3 text-sm text-fg-2 before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line">
-            Đọc truyện chữ, không quảng cáo
-          </p>
-
-          {completed.length >= MIN_FOR_SHELF && (
-            <Shelf
-              title="Truyện hoàn thành"
-              novels={completed.slice(0, SHELF_SIZE)}
-              action={{ href: "/danh-sach/hoan-thanh", label: "Thêm →" }}
-            />
+          {moreReading.length > 0 && (
+            <ContinueList rows={moreReading} className={suggested.length > 0 ? "xl:col-span-5" : "xl:col-span-12"} />
           )}
-        </>
+
+          {suggested.length > 0 && (
+            <section className={cn("min-w-0 rounded-card bg-surface p-5 lg:p-6", moreReading.length > 0 ? "xl:col-span-7" : "xl:col-span-12")}>
+              <HomeHeading
+                icon={<StarBadge />}
+                title="Gợi ý cho bạn"
+                action={{ href: "/the-loai", label: "Xem thêm →" }}
+                className="mb-2"
+              />
+              <ul className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+                {suggested.map((novel) => (
+                  <li key={novel.slug}>
+                    <CoverTile novel={novel} sizes="(min-width:1024px) 150px, 33vw" />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <PromoCard className="xl:col-span-5 xl:col-start-8 xl:row-start-1" />
+        </div>
       )}
     </main>
   );

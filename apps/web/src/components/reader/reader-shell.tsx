@@ -164,7 +164,7 @@ export function ReaderShell({
           <div
             className="mt-7"
             style={{
-              fontFamily: prefs.serif ? "var(--font-literata)" : "var(--font-be-vietnam)",
+              fontFamily: prefs.serif ? "var(--font-literata)" : "var(--font-nunito)",
               fontSize,
               lineHeight,
             }}>

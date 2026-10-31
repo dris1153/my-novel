@@ -1,55 +1,48 @@
+import Image from "next/image";
 import Link from "next/link";
 
-import { AuthSlot } from "./auth-slot";
-import { NavLink } from "./nav-link";
-import { DESKTOP_NAV, SearchIcon } from "./nav-items";
+import { SearchIcon } from "./nav-items";
 import { SearchForm } from "./search-form";
+import { UserAvatar } from "./user-avatar";
 
 import { getAuthorizedUser } from "@/lib/auth";
+import { cn } from "@/lib/cn";
 
-/**
- * Hàng trắng (wordmark + tìm kiếm) dính trên cùng; màn rộng thêm thanh nav slate bên dưới,
- * cuộn theo trang để không chiếm chỗ đọc.
- */
+/** Màn rộng: ô tìm + nút tài khoản (logo nằm ở sidebar). Điện thoại: logo + nút tìm + ảnh. */
 export async function Header() {
   const user = await getAuthorizedUser();
+  const name = user?.name ?? user?.email?.split("@")[0] ?? "Tôi";
 
   return (
-    <>
-      <header className="sticky top-0 z-30 border-b border-line bg-surface">
-        <div className="mx-auto flex h-14 w-full max-w-[1200px] items-center gap-6 px-4 lg:h-16 lg:px-6">
-          <Link href="/" className="font-heading text-2xl leading-none font-bold text-accent-fg">
-            Truyện
-          </Link>
+    <header className="sticky top-0 z-30 bg-canvas">
+      <div className="mx-auto flex h-14 w-full max-w-[1320px] items-center gap-3 px-4 lg:h-[72px] lg:px-6">
+        <Link
+          href="/"
+          className={cn("flex items-center gap-2 font-heading text-xl font-extrabold text-fg", user && "lg:hidden")}>
+          <Image src="/art/logo-book.webp" alt="" width={36} height={34} unoptimized />
+          Truyện
+        </Link>
 
-          {user && (
-            <>
-              <SearchForm className="hidden max-w-[520px] flex-1 lg:flex" />
-              <div className="ml-auto flex items-center gap-2">
-                <Link
-                  href="/tim-kiem"
-                  aria-label="Tìm kiếm"
-                  className="grid size-11 place-items-center rounded-full text-fg hover:bg-hover lg:hidden">
-                  <SearchIcon />
-                </Link>
-                <AuthSlot name={user.name ?? user.email?.split("@")[0] ?? "Tôi"} />
-              </div>
-            </>
-          )}
-        </div>
-      </header>
-
-      {user && (
-        <nav aria-label="Danh mục" className="hidden bg-bar [--focus-offset:-3px] [--focus-ring:var(--on-bar)] lg:block">
-          <div className="mx-auto flex w-full max-w-[1200px] px-6">
-            {DESKTOP_NAV.map(({ href, label }) => (
-              <NavLink key={href} href={href}>
-                {label}
-              </NavLink>
-            ))}
-          </div>
-        </nav>
-      )}
-    </>
+        {user && (
+          <>
+            <SearchForm className="hidden max-w-[400px] flex-1 lg:flex" />
+            <div className="ml-auto flex items-center gap-2">
+              <Link
+                href="/tim-kiem"
+                aria-label="Tìm kiếm"
+                className="grid size-11 place-items-center rounded-full text-fg hover:bg-hover lg:hidden">
+                <SearchIcon />
+              </Link>
+              <Link href="/toi" aria-label={`Tài khoản: ${name}`} className="flex min-h-11 items-center gap-3 rounded-full">
+                <span className="hidden max-w-[200px] truncate rounded-full border border-line-strong bg-surface px-4 py-2 text-sm font-semibold text-fg lg:block">
+                  {name}
+                </span>
+                <UserAvatar name={name} image={user.image} />
+              </Link>
+            </div>
+          </>
+        )}
+      </div>
+    </header>
   );
 }
