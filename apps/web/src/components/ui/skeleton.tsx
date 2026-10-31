@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
 export function Skeleton({ className }: { className?: string }) {
   return (
     <div className="t-skel-skeleton is-pulsing">
-      <div className={cn("rounded-lg bg-surface", className)} />
+      <div className={cn("rounded-lg bg-line", className)} />
     </div>
   );
 }

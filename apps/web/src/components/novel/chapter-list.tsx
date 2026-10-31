@@ -23,7 +23,7 @@ function ChapterRow({
         aria-current={reading ? "true" : undefined}
         className={cn(
           "group -mx-2 flex min-h-12 items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-hover",
-          reading && "bg-surface"
+          reading && "bg-accent-soft"
         )}>
         <span className={cn("w-12 shrink-0 text-xs tabular-nums", read ? "text-fg-3" : "text-fg-2")}>
           {chapter.number}
@@ -67,7 +67,7 @@ export function ChapterToc({
   current?: number | null;
 }) {
   return (
-    <ol className="mt-4 grid sm:grid-cols-2 sm:gap-x-8">
+    <ol className="grid grid-cols-1 sm:grid-cols-2 sm:gap-x-8">
       {chapters.map((chapter) => (
         <ChapterRow key={chapter.number} slug={slug} chapter={chapter} current={current} />
       ))}

@@ -18,8 +18,8 @@ const THEMES = {
   dark: tokens(/html\.dark\s*\{([^}]*)\}/),
 };
 
-const TEXT = ["fg", "fg-2", "fg-3", "accent-fg"];
-const BACKGROUNDS = ["canvas", "subtle", "surface", "raised"];
+const TEXT = ["fg", "fg-2", "fg-3", "accent-fg", "hot-fg"];
+const BACKGROUNDS = ["canvas", "subtle", "surface", "raised", "hover", "accent-soft"];
 
 for (const [name, t] of Object.entries(THEMES)) {
   test(`${name}: mọi token chữ đạt 4.5:1 trên mọi nền`, () => {
@@ -31,8 +31,8 @@ for (const [name, t] of Object.entries(THEMES)) {
     }
   });
 
-  test(`${name}: chữ trên nút nhấn và nền nhấn nhạt đạt 4.5:1`, () => {
-    for (const [fg, bg] of [["on-accent", "accent"], ["fg", "accent-soft"], ["accent-fg", "accent-soft"]]) {
+  test(`${name}: chữ trên nút nhấn, nền nhấn nhạt và thanh slate đạt 4.5:1`, () => {
+    for (const [fg, bg] of [["on-accent", "accent"], ["on-accent", "accent-hover"], ["on-bar", "bar"]]) {
       const r = ratio(t[fg], t[bg]);
       assert.ok(r >= 4.5, `${fg} trên ${bg} = ${r.toFixed(2)}`);
     }

@@ -32,9 +32,8 @@ export function ReaderSettingsSheet({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   const segment = (selected: boolean) =>
-    cn("min-h-11 flex-1 rounded-lg text-sm transition-colors", selected && "font-semibold");
-  const segmentStyle = (selected: boolean) =>
-    selected ? { backgroundColor: theme.fg, color: theme.bg } : { color: theme.dim };
+    cn("min-h-11 flex-1 rounded-control text-sm transition-colors", selected && "bg-accent font-semibold text-on-accent");
+  const segmentStyle = (selected: boolean) => (selected ? undefined : { color: theme.dim });
 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Cài đặt đọc">

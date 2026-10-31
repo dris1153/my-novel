@@ -17,14 +17,14 @@ export default async function GenresPage() {
   const sorted = [...tiles].sort((a, b) => Number(b.count > 0) - Number(a.count > 0));
 
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-4 pt-6 lg:px-6 lg:pt-10">
-      <h1 className="font-serif text-2xl font-bold text-fg lg:text-3xl">Thể loại</h1>
-      <p className="mt-1 text-sm text-fg-2">Chọn một thể loại để xem danh sách truyện.</p>
+    <main className="mx-auto w-full max-w-[1200px] px-4 pt-4 lg:px-6 lg:pt-6">
+      <h1 className="border-l-4 border-accent pl-3 font-heading text-2xl font-bold text-fg lg:text-3xl">Thể loại</h1>
+      <p className="mt-1 pl-4 text-sm text-fg-2">Chọn một thể loại để xem danh sách truyện.</p>
 
       {sorted.length === 0 ? (
         <EmptyState art="no-results" title="Chưa có thể loại nào" />
       ) : (
-        <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-4">
+        <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-4">
           {sorted.map((tile) => (
             <li key={tile.slug}>
               <GenreTile tile={tile} />

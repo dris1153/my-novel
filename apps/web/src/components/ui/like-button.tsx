@@ -29,7 +29,6 @@ export function LikeButton({
   labelOn,
   labelOff,
   disabled,
-  iconOnly = false,
   className,
 }: {
   liked: boolean;
@@ -37,8 +36,6 @@ export function LikeButton({
   labelOn: string;
   labelOff: string;
   disabled?: boolean;
-  /** Chỉ hiện trái tim; nhãn vẫn đọc được bằng trình đọc màn hình. */
-  iconOnly?: boolean;
   className?: string;
 }) {
   const [bursting, setBursting] = useState(false);
@@ -71,8 +68,7 @@ export function LikeButton({
       disabled={disabled}
       onClick={handleClick}
       className={cn(
-        "t-like relative inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line-strong bg-surface text-sm leading-none font-semibold text-fg transition-colors hover:bg-hover disabled:opacity-60",
-        iconOnly ? "size-13" : "px-4",
+        "t-like relative inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-line-strong bg-surface px-4 text-sm leading-none font-semibold text-fg transition-colors hover:bg-hover disabled:opacity-60",
         bursting && "is-bursting",
         className
       )}>
@@ -80,8 +76,8 @@ export function LikeButton({
         <svg
           className="t-like-heart"
           viewBox="0 0 24 24"
-          width={iconOnly ? 22 : 16}
-          height={iconOnly ? 22 : 16}
+          width={16}
+          height={16}
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
@@ -98,7 +94,7 @@ export function LikeButton({
         ))}
       </span>
 
-      <span className={iconOnly ? "sr-only" : undefined}>{liked ? labelOn : labelOff}</span>
+      <span>{liked ? labelOn : labelOff}</span>
     </button>
   );
 }

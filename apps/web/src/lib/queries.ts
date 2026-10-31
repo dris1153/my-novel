@@ -88,6 +88,14 @@ export async function fetchByGenre(slug: string, limit = 24, offset = 0): Promis
     .map(toCard);
 }
 
+export async function fetchCompleted(limit = 24, offset = 0): Promise<NovelCard[]> {
+  const { novels } = await getIndex();
+  return novels
+    .filter((n) => n.status === "completed")
+    .slice(offset, offset + limit)
+    .map(toCard);
+}
+
 export async function searchNovels(term: string, limit = 24, offset = 0): Promise<NovelCard[]> {
   const q = fold(term);
   if (!q) return [];

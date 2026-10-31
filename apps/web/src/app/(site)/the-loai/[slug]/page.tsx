@@ -2,9 +2,10 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { GenreChips } from "@/components/novel/genre-chips";
-import { GenreList } from "@/components/novel/genre-list";
+import { GenreEmpty } from "@/components/novel/genre-empty";
 import { NovelGridSkeleton } from "@/components/novel/novel-grid-skeleton";
-import { fetchGenre, fetchGenreTiles } from "@/lib/queries";
+import { PagedNovelGrid } from "@/components/novel/paged-novel-grid";
+import { fetchByGenre, fetchGenre, fetchGenreTiles } from "@/lib/queries";
 
 export const revalidate = 600;
 
@@ -25,13 +26,18 @@ export default async function GenrePage({ params }: PageProps<"/the-loai/[slug]"
   if (!genre) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-4 pt-6 lg:px-6 lg:pt-10">
-      <h1 className="font-serif text-2xl font-bold text-fg lg:text-3xl">{genre.name}</h1>
+    <main className="mx-auto w-full max-w-[1200px] px-4 pt-4 lg:px-6 lg:pt-6">
+      <h1 className="border-l-4 border-accent pl-3 font-heading text-2xl font-bold text-fg lg:text-3xl">{genre.name}</h1>
       <div className="mt-4">
         <GenreChips genres={tiles.filter((tile) => tile.count > 0)} activeSlug={genre.slug} />
       </div>
       <Suspense fallback={<NovelGridSkeleton />}>
-        <GenreList slug={genre.slug} page={1} />
+        <PagedNovelGrid
+          load={(limit, offset) => fetchByGenre(genre.slug, limit, offset)}
+          basePath={`/the-loai/${genre.slug}`}
+          page={1}
+          empty={<GenreEmpty />}
+        />
       </Suspense>
     </main>
   );

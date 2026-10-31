@@ -24,7 +24,7 @@ export default async function TocPage({ params }: PageProps<"/truyen/[slug]/muc-
   if (!novel) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-[900px] px-4 pt-4 lg:pt-8">
+    <main className="mx-auto w-full max-w-[1000px] px-4 pt-4 lg:px-6 lg:pt-6">
       <TocHeader novel={novel} page={1} />
       <Suspense fallback={<ChapterListSkeleton rows={12} />}>
         <TocList slug={novel.slug} page={1} />

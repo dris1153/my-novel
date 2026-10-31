@@ -21,9 +21,9 @@ export async function TocList({ slug, page }: { slug: string; page: number }) {
   }
 
   return (
-    <>
+    <div className="mt-4 rounded-card bg-surface p-3 lg:p-5">
       <ChapterToc slug={slug} chapters={chapters} current={state.progress[slug]?.chapter ?? null} />
       <PageNav page={page} hasMore={hasMore} hrefFor={(target) => pagedHref(`/truyen/${slug}/muc-luc`, target)} />
-    </>
+    </div>
   );
 }

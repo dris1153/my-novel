@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { NextChapterCard } from "./next-chapter-card";
+import { ChapterNavPair } from "./chapter-nav-pair";
 import { ReaderChrome } from "./reader-chrome";
 import { ReaderSettingsSheet } from "./reader-settings-sheet";
 import { useChromeVisibility } from "./use-chrome-visibility";
@@ -142,16 +143,23 @@ export function ReaderShell({
           onClick={onArticleClick}
           className="mx-auto w-full px-5 pt-20 pb-32"
           style={{ maxWidth: READER_WIDTH + 40 }}>
-          {chapterTitle ? (
-            <>
-              <p className="font-sans text-xs font-semibold tracking-[0.08em] uppercase" style={{ color: theme.dim }}>
-                Chương {chapterNumber}
-              </p>
-              <h1 className="mt-2 font-read text-[24px] leading-snug font-semibold">{chapterTitle}</h1>
-            </>
-          ) : (
-            <h1 className="font-read text-[24px] leading-snug font-semibold">Chương {chapterNumber}</h1>
-          )}
+          <header className="text-center">
+            <Link href={novelHref} className="inline-flex min-h-11 items-center px-2 font-sans text-sm" style={{ color: theme.dim }}>
+              {novelTitle}
+            </Link>
+            {chapterTitle ? (
+              <>
+                <p className="font-heading text-sm font-bold tracking-[0.08em] uppercase" style={{ color: theme.dim }}>
+                  Chương {chapterNumber}
+                </p>
+                <h1 className="mt-1 font-heading text-[26px] leading-snug font-bold">{chapterTitle}</h1>
+              </>
+            ) : (
+              <h1 className="font-heading text-[26px] leading-snug font-bold">Chương {chapterNumber}</h1>
+            )}
+          </header>
+
+          <ChapterNavPair theme={theme} prevHref={prevHref} nextHref={nextHref} />
 
           <div
             className="mt-7"
@@ -163,13 +171,11 @@ export function ReaderShell({
             {children}
           </div>
 
-          <NextChapterCard
+          <ChapterNavPair
             theme={theme}
-            chapterNumber={chapterNumber}
+            prevHref={prevHref}
             nextHref={nextHref}
-            nextNumber={nextNumber}
-            nextTitle={nextTitle}
-            novelHref={novelHref}
+            end={{ chapterNumber, nextTitle, novelHref }}
           />
         </article>
       </div>

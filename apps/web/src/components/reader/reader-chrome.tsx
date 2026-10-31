@@ -24,7 +24,7 @@ const ICON_BUTTON = "grid size-11 shrink-0 place-items-center rounded-full";
 
 /**
  * Thanh trên + dưới của trình đọc. Nằm đè lên chữ (fixed) nên bật/tắt không làm chữ nhảy;
- * chỉ trượt bằng transform. Màu theo nền đọc, không theo theme của app.
+ * chỉ trượt bằng transform. Thanh trên nền slate cố định (kiểu TruyenYY); thanh dưới theo nền đọc.
  */
 export function ReaderChrome({
   visible,
@@ -63,8 +63,11 @@ export function ReaderChrome({
       <header
         onFocusCapture={onFocusChrome}
         onBlurCapture={onBlurChrome}
-        className={cn("fixed inset-x-0 top-[2px] z-40 border-b", slide, !visible && "-translate-y-[calc(100%+2px)]")}
-        style={bar}>
+        className={cn(
+          "fixed inset-x-0 top-[2px] z-40 border-b border-line bg-bar text-on-bar [--focus-ring:var(--on-bar)]",
+          slide,
+          !visible && "-translate-y-[calc(100%+2px)]"
+        )}>
         <div className="mx-auto flex h-14 w-full max-w-[760px] items-center gap-1 px-1">
           <Link href={novelHref} aria-label="Về trang truyện" className={ICON_BUTTON}>
             <svg {...ICON}>
@@ -72,8 +75,8 @@ export function ReaderChrome({
             </svg>
           </Link>
           <div className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-[13px] font-semibold">{novelTitle}</span>
-            <span className="text-[11px]" style={{ color: theme.dim }}>
+            <span className="truncate font-heading text-[15px] font-bold">{novelTitle}</span>
+            <span className="text-[11px] text-on-bar/80">
               Chương {chapterNumber} / {total}
             </span>
           </div>

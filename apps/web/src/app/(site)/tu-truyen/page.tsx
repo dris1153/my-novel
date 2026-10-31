@@ -30,18 +30,18 @@ export default async function LibraryPage({ searchParams }: PageProps<"/tu-truye
   ];
 
   return (
-    <main className="mx-auto w-full max-w-[760px] px-4 pt-6 lg:pt-10">
-      <h1 className="font-serif text-2xl font-bold text-fg lg:text-3xl">Tủ truyện</h1>
+    <main className="mx-auto w-full max-w-[760px] px-4 pt-4 lg:pt-6">
+      <h1 className="border-l-4 border-accent pl-3 font-heading text-2xl font-bold text-fg lg:text-3xl">Tủ truyện</h1>
 
-      <nav aria-label="Lọc tủ truyện" className="mt-4 flex gap-2">
+      <nav aria-label="Lọc tủ truyện" className="mt-4 grid grid-cols-2 gap-1 rounded-control bg-hover p-1">
         {tabs.map(({ key, label, count }) => (
           <Link
             key={key}
             href={`/tu-truyen?tab=${key}`}
             aria-current={tab === key ? "page" : undefined}
             className={cn(
-              "inline-flex min-h-11 items-center rounded-full px-4 text-sm transition-colors",
-              tab === key ? "bg-fg font-semibold text-canvas" : "bg-surface text-fg-2 hover:text-fg"
+              "inline-flex min-h-11 items-center justify-center rounded-control px-4 text-sm transition-colors",
+              tab === key ? "bg-accent font-semibold text-on-accent" : "text-fg-2 hover:text-fg"
             )}>
             {label} · {count}
           </Link>
@@ -60,7 +60,7 @@ export default async function LibraryPage({ searchParams }: PageProps<"/tu-truye
           action={{ href: "/", label: "Khám phá truyện" }}
         />
       ) : (
-        <ul className="mt-2">
+        <ul className="mt-4 rounded-card bg-surface px-3">
           {rows.map((row) => (
             <LibraryRow key={row.novel.slug} row={row} />
           ))}

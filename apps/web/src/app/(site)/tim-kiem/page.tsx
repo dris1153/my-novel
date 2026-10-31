@@ -1,7 +1,6 @@
-import { SearchIcon } from "@/components/chrome/nav-items";
+import { SearchForm } from "@/components/chrome/search-form";
 import { GenreChips } from "@/components/novel/genre-chips";
 import { NovelGrid } from "@/components/novel/novel-card";
-import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageNav } from "@/components/ui/page-nav";
 import { fetchGenreTiles, searchNovels } from "@/lib/queries";
@@ -29,29 +28,14 @@ export default async function SearchPage({ searchParams }: PageProps<"/tim-kiem"
   const hrefFor = (target: number) => `/tim-kiem?q=${encodeURIComponent(q)}${target > 1 ? `&page=${target}` : ""}`;
 
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-4 pt-6 lg:px-6 lg:pt-10">
+    <main className="mx-auto w-full max-w-[1200px] px-4 pt-4 lg:px-6 lg:pt-6">
       <h1 className="sr-only">Tìm kiếm</h1>
 
-      <form action="/tim-kiem" method="get" role="search" className="flex gap-2">
-        <label className="flex min-h-12 flex-1 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-fg-2 focus-within:border-accent-fg">
-          <SearchIcon />
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Tìm truyện, tác giả… (không cần dấu)"
-            aria-label="Từ khoá tìm kiếm"
-            autoFocus
-            className="min-w-0 flex-1 bg-transparent text-[15px] text-fg outline-none placeholder:text-fg-3"
-          />
-        </label>
-        <Button type="submit" className="min-h-12">
-          Tìm
-        </Button>
-      </form>
+      <SearchForm defaultValue={q} autoFocus />
 
       {q === "" ? (
-        <section className="mt-8">
-          <h2 className="mb-3 text-sm font-semibold text-fg-2">Duyệt theo thể loại</h2>
+        <section className="mt-4 rounded-card bg-surface p-4">
+          <h2 className="mb-3 border-l-4 border-accent pl-2.5 font-heading text-lg font-bold text-fg">Duyệt theo thể loại</h2>
           <GenreChips genres={tiles.filter((tile) => tile.count > 0)} />
         </section>
       ) : results.length === 0 ? (
@@ -61,16 +45,14 @@ export default async function SearchPage({ searchParams }: PageProps<"/tim-kiem"
           description={`Không có truyện nào khớp “${q}”. Thử tên ngắn hơn hoặc tên tác giả.`}
         />
       ) : (
-        <>
-          <p className="mt-6 text-sm text-fg-2">
+        <div className="mt-4 rounded-card bg-surface p-3 lg:p-5">
+          <p className="mb-4 text-sm text-fg-2">
             {results.length}
             {hasMore ? "+" : ""} kết quả cho “{q}”
           </p>
-          <div className="mt-4">
-            <NovelGrid novels={results} />
-          </div>
+          <NovelGrid novels={results} />
           <PageNav page={page} hasMore={hasMore} hrefFor={hrefFor} />
-        </>
+        </div>
       )}
     </main>
   );
