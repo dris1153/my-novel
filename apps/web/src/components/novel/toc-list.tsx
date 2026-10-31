@@ -17,11 +17,11 @@ export async function TocList({ slug, page }: { slug: string; page: number }) {
   const chapters = rows.slice(0, TOC_PAGE_SIZE);
 
   if (chapters.length === 0) {
-    return <p className="mt-6 text-sm text-fg-2">Chưa có chương nào.</p>;
+    return <p className="rounded-card bg-surface p-6 text-sm text-fg-2">Chưa có chương nào.</p>;
   }
 
   return (
-    <div className="mt-4 rounded-card bg-surface p-3 lg:p-5">
+    <div className="rounded-card bg-surface p-5 lg:p-6">
       <ChapterToc slug={slug} chapters={chapters} current={state.progress[slug]?.chapter ?? null} />
       <PageNav page={page} hasMore={hasMore} hrefFor={(target) => pagedHref(`/truyen/${slug}/muc-luc`, target)} />
     </div>

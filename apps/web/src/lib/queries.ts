@@ -130,10 +130,10 @@ export async function fetchChapterList(
   return ordered.slice(offset, offset + limit).map((e) => ({ number: e.n, title: e.title }));
 }
 
-/** Chương nhỏ nhất — đích của nút "Đọc từ đầu". */
-export async function fetchFirstChapterNumber(slug: string): Promise<number | null> {
-  if (!isSlug(slug)) return null;
-  return (await getChapters(slug))[0]?.n ?? null;
+/** Số các chương đang có (tăng dần; có thể hở nếu nguồn lỗi) — cho nút "Đọc từ đầu"/"Đọc tiếp". */
+export async function fetchChapterNumbers(slug: string): Promise<number[]> {
+  if (!isSlug(slug)) return [];
+  return (await getChapters(slug)).map((e) => e.n);
 }
 
 /** Một chương + hàng xóm + tổng số chương (để hiện "chương N / M"). */
