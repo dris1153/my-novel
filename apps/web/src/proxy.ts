@@ -19,7 +19,8 @@ export const proxy = auth((req) => {
   return NextResponse.redirect(url);
 });
 
-// Không loại trừ theo đuôi file; chỉ miễn file tĩnh build ra. Xem gate.test.ts.
+// Không loại trừ theo đuôi file; chỉ miễn file tĩnh build ra và tranh minh hoạ công khai
+// trong `public/art/` (trang đăng nhập cần hiện được). Xem gate.test.ts.
 export const config = {
-  matcher: ["/((?!_next/static|favicon\\.ico).*)"],
+  matcher: ["/((?!_next/static/|favicon\\.ico$|art/).*)"],
 };

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
-import { InkScene } from "@/components/ui/ink-scene";
+import { InkArt } from "@/components/ui/ink-art";
 import { signInWithGoogle } from "@/lib/actions";
 import { isAllowedEmail } from "@/lib/identity";
 
@@ -21,7 +21,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/dang-nhap
 
   return (
     <main className="mx-auto flex w-full max-w-[420px] flex-col px-6 pt-10">
-      <InkScene className="h-44 w-full" />
+      <InkArt name="sign-in" className="aspect-[840/781] w-full" />
 
       <h1 className="mt-6 text-center font-serif text-3xl font-bold text-fg">Thư viện đêm</h1>
       <p className="mt-2 text-center text-sm text-fg-2">
