@@ -1,6 +1,6 @@
 ---
 title: "Revamp UI — hệ 'Thư viện đêm' (dark-first, mobile-first)"
-status: in-progress
+status: completed
 scope: project
 created: 2026-10-31
 source: plans/reports/brainstorm-20261031-ui-revamp-thu-vien-dem.md
@@ -43,7 +43,7 @@ Research: `plans/reports/researcher-20261030-{novel-platform-ui-patterns,reader-
 | 5 | [Chi tiết truyện + mục lục](phase-05-novel-detail-toc.md) | done | 2, 3 |
 | 6 | [Tủ truyện](phase-06-library.md) | done | 2, 3 |
 | 7 | [Trình đọc](phase-07-reader.md) | done | 1 |
-| 8 | [Art thủy mặc AI](phase-08-ink-wash-art.md) | blocked (key Gemini free-tier) — đã có placeholder | 1 |
+| 8 | [Art thủy mặc AI](phase-08-ink-wash-art.md) | done (OpenAI gpt-image-2) | 1 |
 | 9 | [Hoàn thiện + kiểm tra + docs](phase-09-polish-verify-docs.md) | done | 4–8 |
 
 Song song được: 1 ∥ 3; sau 1: 7 ∥ 8; sau 2+3: 4 ∥ 5 ∥ 6 (file khác nhau).

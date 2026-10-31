@@ -84,7 +84,7 @@ All loaded via `next/font/google` with `subsets: ["latin", "vietnamese"]`. Secti
 
 ## Art
 
-Direction: monochrome ink-wash (thủy mặc) scenes with large negative space, delivered as alpha-mask WebP tinted by CSS so one file serves both themes (see `plans/reports/researcher-20261030-ai-illustration-direction.md` for prompts and checklist). **Status:** generation needs a billed Gemini key; until then `InkScene` (SVG mountains + moon in `fg-3`) stands in everywhere art is used — sign-in, home banner, empty states, 404, error.
+Monochrome ink-wash (thủy mặc) scenes with large negative space: `apps/web/public/art/*.webp` (sign-in, home-banner, empty-library, no-results, no-chapters, not-found, error). Each file is an alpha mask (alpha = ink density) rendered by `InkArt` (`components/ui/ink-art.tsx`) as `background-color: var(--ink-art)` + `mask-image`, so one file serves both themes. Art is decorative (`aria-hidden`) and always paired with text. `/art/` is the only public path exempt from the login gate (the sign-in page needs it). Provenance, prompts and conversion commands: `plans/20261031-ui-revamp-thu-vien-dem/art-prompts.md`; converter: `apps/web/scripts/ink-to-mask.mjs`.
 
 ## Motion
 

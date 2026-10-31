@@ -23,8 +23,14 @@ test("slug kết thúc bằng đuôi ảnh không lọt gate", () => {
   }
 });
 
-test("chỉ file tĩnh build ra và favicon được miễn", () => {
+test("chỉ file tĩnh build ra, favicon và thư mục tranh /art/ được miễn", () => {
   assert.equal(gated("/_next/static/chunks/a.js"), false);
   assert.equal(gated("/favicon.ico"), false);
-  assert.equal(gated("/favicon-ico"), true);
+  assert.equal(gated("/art/sign-in.webp"), false);
+});
+
+test("tiền tố gần giống không lọt gate", () => {
+  for (const p of ["/favicon-ico", "/favicon.icon", "/art", "/artx", "/arts/x.webp", "/truyen/art/x", "/_next/staticx", "/_next/data/x"]) {
+    assert.equal(gated(p), true, p);
+  }
 });
